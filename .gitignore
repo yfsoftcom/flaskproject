@@ -1,0 +1,13 @@
+__pycache__
+snap*.png
+build/
+dist/
+*.spec
+output/*.html
+*.log
+session
+snap/*.png
+*.pyc
+.DS_Store
+*.exe
+ngrok

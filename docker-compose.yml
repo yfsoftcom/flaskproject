@@ -1,0 +1,12 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "5555:5555"
+    networks:
+      - dev-network
+    volumes:
+      - ./apps:/apps
+networks:
+  dev-network: 

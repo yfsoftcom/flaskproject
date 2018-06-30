@@ -1,0 +1,189 @@
+<html>
+    <head>
+      <title>Xv Search</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <meta name="x5-orientation" content="portrait">
+      <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
+      <style>
+          .form-control{
+              width: 50%;
+          }
+          
+        .img-box{
+            position: relative;
+            padding-bottom: 70%;
+        }
+        .img-box img{
+            position:absolute;
+            top:0;
+            bottom:0;
+            left:0;
+            right:0;
+            width:100%;
+            margin:auto;
+        }
+        img:after {  
+            content: "\f1c5" " " attr(alt);
+           
+            font-size: 16px;
+            font-family: FontAwesome;
+            color: rgb(100, 100, 100);
+           
+            display: block;
+            position: absolute;
+            z-index: 2;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+          }
+          
+          .center{
+              margin: 1em auto;
+          }
+          .block{
+              display: block;
+          }
+          
+          .card{
+              overflow: hidden; padding: 10px; margin: 5px;
+          }
+          h6,.no-break{
+              font-size: 16px;
+              height: 2em;
+              overflow: hidden;
+              text-overflow:ellipsis;
+              white-space: nowrap;
+          }
+          .modal{
+              max-width: 100%;
+          }
+          .modal-title{
+              margin-bottom: 0; height: 1em; line-height: 1em;
+          }
+          .progress-bar{
+              position: fixed; top: 0; width: 100%; height: 10px;
+              z-index: 9999;
+              border-radius: 0; margin: 0;
+          }
+          .progress-bar>span{
+              border-radius: 0;
+          }
+          input[type="text"], input[type="password"], select {
+              border-radius: 0;
+              border: 2px solid #996666;
+          }
+      </style>
+    </head>
+    <body ng-app="app">{% raw %}
+        <div ng-controller="MainControll" ng-cloak>
+            <div class="progress-bar striped animated" ng-if="progressing">
+                <span class="progress-bar-red" style="width: 100%;"></span>
+            </div>
+            <div class="modal-mask" ng-if="showModal">
+                <div class="modal">
+                    <div class="modal-head">
+                        <p class="modal-title no-break" ng-bind="movie.title"></p>
+                    </div>
+                    <div>
+                        <video width="100%" height="auto" controls="controls">
+                            <source ng-if="showModal" src="{{movie.origin_mp4}}" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="button-danger-outlined" ng-click="closeModal()">Close</button>
+                    </div>
+                </div>
+            </div>
+            <header>
+                <h1 class="title">Get That Thing What You Want !</h1>
+                <p class="subtitle">
+                    <div class="form-control">
+                        <input type="text" placeholder="Type keywords, Then press [Enter]" ng-model="keywords" ng-keypress="keypress($event)"/>
+                    </div>
+                </p>
+                <p class="disclaimer">Type keywords, Then press [Enter]</p>
+                <a class="scroll-down" href="#result" ng-if="hasResult"></a>                
+            </header>
+            <main>
+                <section id="result">
+                    <div class="row">
+                        <div class="col col-md-4" ng-repeat="row in result.rows">
+                            <div class="card">
+                                <h6 ng-bind="row.title"></h6>
+                                <div class="img-box">
+                                    <img alt="{{row.title}}" class="img" src="" ng-src="{{row.prev_image}}" />
+                                </div>
+                                <p><span ng-bind="row.duration"></span> <span ng-bind="row.views"></span> <button class="button-xs button-warning-outlined float-right" ng-click="show(row)">Watch</button></p>
+                            </div>
+                        </div>
+                    </div>
+                    <button ng-click="next()" class="button-xs button-success block center" ng-if="hasResult && hasNext">Next</button>
+                </section>
+            </main>
+        </div>
+        <script src="https://cdn.bootcss.com/angular.js/1.7.0/angular.min.js"></script>
+        <script src="https://cdn.bootcss.com/lodash.js/4.17.10/lodash.min.js"></script>
+<script>
+    var app = angular.module('app',[]);
+    
+    app.controller('MainControll', function($scope, $http){
+        $scope.result = { rows: [], pagination: { current: 0 }}
+        $scope.keywords = ''
+        $scope.hasResult = false
+        $scope.hasNext = true
+        $scope.progressing = false
+        $scope.showModal = false
+        $scope.movie = {}
+        $scope.keypress = function(ev) { 
+            if (ev.keyCode !== 13) return;
+            $scope.result = { rows: [], pagination: { current: 0 }}
+            search($scope.keywords)
+        }
+        $scope.next = function() {
+            var current = $scope.result.pagination.current
+            search($scope.keywords, current + 1)
+        }
+        $scope.closeModal = function(){
+            $scope.movie = {}
+            $scope.showModal = false
+        }
+        $scope.show = function(row) {
+            $scope.progressing = true
+            $http.get(`./api/video/${row.short_href}`)
+                .then(function(rsp){
+                    var data = rsp.data
+                    $scope.movie.title = row.title
+                    $scope.movie = _.assign($scope.movie, data)
+                    $scope.showModal = true
+                    $scope.progressing = false
+                })
+                .catch(function(err){
+                    $scope.progressing = false
+                })
+        }
+        var search = function(keywords, p){
+            
+            $scope.progressing = true
+            $http.get(`./api/search/p/${p||0}/${keywords}`)
+                .then(function(rsp){
+                    var data = rsp.data
+                    $scope.progressing = false
+                    $scope.result.pagination = data.pagination
+                    $scope.result.rows = _.concat($scope.result.rows, data.rows)
+                    $scope.hasNext = $scope.result.pagination.current < $scope.result.pagination.max - 1
+                    $scope.hasResult = true
+                })
+                .catch(function(err){
+                    $scope.progressing = false
+                })
+        }
+    });
+        
+</script>{% endraw %}
+    </body>
+</html>

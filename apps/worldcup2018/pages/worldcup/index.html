@@ -1,0 +1,121 @@
+<html>
+    <head>
+      <title>WorldCup 2018</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <meta name="x5-orientation" content="portrait">
+      <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
+      <style>
+          section{
+              padding: 5px;
+          }
+          .button-xs{
+              padding: 0 10px;
+              height: 30px;
+              line-height: 26px;
+          }
+          .row{
+              margin: 0;
+          }
+          input[type='text']{
+            width: 3em; padding: 0; text-align: center; margin: 0; border-radius: 0;
+          }
+          .color-orange{
+            color: #fff; background: #ff9800; padding: 0 6px;
+          }
+          .panel, table{
+              margin-top: 2px;
+              margin-bottom: 2px;
+          }
+          .panel-body{
+              padding-top: 0px;
+              padding-bottom: 4px;
+          }
+          table tbody td, table thead th{
+              padding: 4px 8px;
+          }
+      </style>
+    </head>
+    <body>
+        <main>
+            <section>
+                <form method="POST" action="./forecast">
+                <div class="row">
+                    <div class="col col-lg-3">
+                        <h6>WorldCup 2018</h6>
+                    </div>
+                    <div class="col col-lg-9 align-right">
+                        <button type="submit" class="button-xs button-success">forecast</button>
+                        <button type="reset" class="button-xs button-warning" onclick="location.href='./refresh'">refresh</button>
+                        <!-- <button class="button-xs button-warning">Warning</button> -->
+                        <!-- <button class="button-xs button-danger">progress</button> -->
+                    </div>
+                </div>
+                <div class="row">
+                    {% for i in range(0, 8) %}
+                    <div class="col col-lg-3">
+
+                        <div class="panel">
+                            <div class="alert-info panel-head">Group - &#{{ i + 65 }};</div>
+                            <div class="panel-body">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Score</th>
+                                            <th>Goals</th>
+                                            <th>Ranking</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for team in groups[i] %}
+                                        <tr>
+                                            <td>{{ team[0] }}</td>
+                                            <td>{{ team[1] }}</td>
+                                            <td>{{ team[2] }}</td>
+                                            <td>{{ team[3] }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div>Matches</div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Host</th>
+                                            <th>Result</th>
+                                            <th>Guest</th>
+                                            <!-- <th>Ranking</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for match in matches[65 + i] %}
+                                        <tr>
+                                            <td>{{ match['id'] }}</td>
+                                            <td>{{ match['H'] }}</td>
+                                            {% if match['a_result'][0] == -1 %}
+                                            <td><input type="text" name="{{match['id']}}"/></td>
+                                            {% else %}
+                                            <td>{{ match['a_result'][0] }} : {{ match['a_result'][1] }}
+                                                {% if match['state'] == 2 %}<span class="color-orange">?</span> {% endif %} 
+                                            </td>
+                                            {% endif %}
+                                            <td>{{ match['G'] }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                    
+                </div>
+                </form>
+            </section>
+        </main>
+    </body>
+</html>

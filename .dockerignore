@@ -1,0 +1,5 @@
+*.exe
+foo.py
+*.pyc
+__pycache__/
+ngrok

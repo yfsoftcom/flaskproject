@@ -1,0 +1,312 @@
+<html>
+    <head>
+      <title>WroldCup 2018</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <meta name="x5-orientation" content="portrait">
+      <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
+      <style>
+          *{
+              font-size: 12px;
+          }
+          section{
+              padding: 5px;
+          }
+          .button-xs{
+              padding: 0 10px;
+              height: 30px;
+              line-height: 26px;
+          }
+          .row{
+              margin: 0;
+          }
+          input[type='text']{
+            width: 3em; padding: 0; text-align: center; margin: 0; border-radius: 0;
+          }
+          .color-orange{
+            color: #fff; background: #ff9800; padding: 0 6px;
+          }
+          .match-result{
+            color: #fff; margin: 2px; min-width: 20px; text-align: center; display: inline-block;
+          }
+          .match-rate{
+            color: #fff; margin: 0 2px; width: 40px; text-align: center; display: inline-block;
+          }
+          .match-host{
+              display: inline-block; max-width: 6em; text-align: right; word-break:break-all;white-space:nowrap; text-overflow:ellipsis;overflow:hidden;
+          }
+          .match-guest{
+              display: inline-block; max-width: 4em; text-align: left; word-break:break-all;white-space:nowrap; text-overflow:ellipsis;overflow:hidden;
+          }
+          .color-win{
+            background: green;
+          }
+          .color-equal{
+            background: grey;
+          }
+          .color-fail{
+            background: red;
+          }
+          .txt-forecast{
+              color: green; font-weight: bold; font-size: 20px;
+          }
+          .txt-return{
+              color: red; font-weight: bold; text-decoration: underline; font-size: 20px;
+          }
+          .txt-rate{
+              font-size: 12px; font-weight: bold;
+          }
+          .number-input{
+            min-width: 2em;max-width: 4em; display: block; border-width: 0; border-bottom: 2px solid black;
+              text-align: center;
+          }
+          .panel, table{
+              margin-top: 2px;
+              margin-bottom: 2px;
+          }
+          .panel-body{
+              padding-top: 0px;
+              padding-bottom: 4px;
+          }
+          table tbody td, table thead th{
+              padding: 4px 8px; font-size: 12px;
+          }
+          .no-padding{
+              padding: 4px 0;
+          }
+      </style>
+    </head>
+    <body>{% raw %}
+        <main ng-app="app">
+            <section ng-controller="MainControll">
+                <div class="row">
+                    <div class="col col-lg-5">
+                        <div>
+                            <h6 class="float-left">WroldCup 2018 Lottery</h6>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Host</th>
+                                    <th>Guest</th>
+                                    <th>W-E-F</th>
+                                    <th>-</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="data in lotterys" ng-click="data[6] = !data[6];toggleMatch(data)">
+                                <td>{{ data[0] }}</td>
+                                <td>{{ data[1] }}</td>
+                                <td><span class="match-rate color-win">{{ data[2] | Number}}</span>
+                                <span class="match-rate color-equal">{{ data[3] | Number }}</span>
+                                <span class="match-rate color-fail">{{ data[4] | Number }}</span></td>
+                                <td>
+                                    <input type="checkbox" class="checkout"
+                                        ng-model="data[6]"
+                                        ng-change="toggleMatch(data)"/>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <h6> Tech Count </h6>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    <th>Goal/Lost</th>
+                                    <th>Scoring</th>
+                                    <th>Pass</th>
+                                    <th>Trakle</th>
+                                    <th>Offside</th>
+                                    <th>saves</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-if="techs.length == 0">
+                                    <td class="align-center" colspan="7"><p><strong> No Data Selected </strong></p></td>
+                                </tr>
+                                <tr ng-repeat="tech in techs">
+                                    <td>{{ tech.teamCnName }}</td>
+                                    <td>{{ tech.goals }}/{{ tech.goalsConceded }}</td>
+                                    <td>{{ tech.ontargetScoringAtt }}/{{ tech.totalScoringAtt }}|{{ tech.ontargetScoringRate | Persent}}</td>
+                                    <td>{{ tech.totalPass }}|{{ tech.passSuccessRate | Persent }}</td>
+                                    <td>{{ tech.totalTackle }}|{{ tech.wonTackleRate | Persent }}</td>
+                                    <td>{{ tech.totalOffside }}</td>
+                                    <td>{{ tech.saves }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col col-lg-7">
+                        <div>
+                            <h6 class="float-left">Strategy</h6>
+                            <button ng-click="reset()" class="float-left button-xs button-success">Reset</button>
+                            <div class="float-right">
+                                Pay: <span class="txt-forecast" ng-bind="input"></span>
+                                    Get: <span class="txt-return" ng-bind="output"></span>
+                                    <span class="txt-rate" ng-bind="getReturnPersent"></span>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Matches</th>
+                                    <th>Rate</th>
+                                    <th>Num</th>
+                                    <th>Return</th>
+                                    <th>Pick?</th>
+                                </tr>
+                            </thead>
+                            <tbody id="strategy">
+                                <tr ng-if="choosedMatches.length == 0">
+                                    <td class="align-center" colspan="5"><p><strong> No Data Selected </strong></p></td>
+                                </tr>
+                                <tr ng-repeat="matchs in choosedMatches">
+                                    <td class="no-padding">
+                                        <span class="match-result" ng-class="{'w':'color-win', 'e':'color-equal', 'f':'color-fail'}[matchs[0].r]">{{ matchs[0].r }}</span>
+                                        <span class="match-host">{{ matchs[0].h }}</span>/<span class="match-guest">{{ matchs[0].g }}</span><br/>
+                                        <span class="match-result" ng-class="{'w':'color-win', 'e':'color-equal', 'f':'color-fail'}[matchs[1].r]">{{ matchs[1].r }}</span>
+                                        <span class="match-host">{{ matchs[1].h }}</span>/<span class="match-guest">{{ matchs[1].g }}</span>
+                                    </td>
+                                    <td>{{ matchs[0].p * matchs[1].p | Number}}</td>
+                                    <td>
+                                        <input class="number-input" type="number" ng-model="matchs[2].n" ng-change="calc()" />
+                                    </td>
+
+                                    <td>
+                                        <span ng-bind="matchs[2].r | Number"></span>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox"
+                                            ng-model="matchs[2].c"
+                                            ng-change="calc()"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <script src="https://cdn.bootcss.com/angular.js/1.7.0/angular.min.js"></script>
+        <script src="https://cdn.bootcss.com/lodash.js/4.17.10/lodash.min.js"></script>
+<script>
+    var app = angular.module('app',[]);
+    app.filter('Number',function(){
+        return function(src){
+            // return Math.round(src*100)/100
+            return src.toFixed(2)
+        }
+    }).filter('Persent',function(){
+        return function(src){
+            // return Math.round(src*100)/100
+            return (parseInt(src)/100.00).toFixed(2) + '%'
+        }
+    })
+    app.controller('MainControll', function($scope, $http){
+        $scope.list = {}
+        $scope.choosedMatches = []
+        $scope.lotterys = []
+        $scope.output = $scope.input = 0
+        $scope.getReturnPersent = '0.00%'
+        $scope.techs = []
+
+        var init = function(){
+            $http.get('./api/getLotteryData')
+                .then(function(data){
+                    _.map(data.data, function(item){
+                        item[6] = false
+                        $scope.lotterys.push(item)
+                    })
+                })
+                .catch(function(err){
+                    console.error(err)
+                })
+        }
+        init()
+        $scope.toggleMatch = function(data){
+            var h = data[0], g = data[1], w = data[2], e = data[3], f = data[4], i = data[5]
+            if(data[6]){
+                if(_.size($scope.list)>=2){
+                    alert('Only Support 2 Matches!')
+                    data[6] = false
+                    return
+                }
+                $scope.list['a_' + i] = {h, g, w: parseFloat(w), e: parseFloat(e), f: parseFloat(f)}
+            }else{
+                delete $scope.list['a_' + i]
+            }
+        }
+
+        $scope.reset = function(){
+            var list = _.values($scope.list)
+            var len = list.length
+            if(len !== 2){
+                alert('Choose 2 Matches')
+                return
+            }
+            var match1 = list[0], match2 = list[1]
+            var h1 = match1.h, g1 = match1.g, h2 = match2.h, g2 = match2.g
+            $scope.choosedMatches.splice(0, $scope.choosedMatches.length)
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'w', p: match1.w }, { h: h2, g: g2, r: 'w', p: match2.w }, {n: 1, c: true, r: 0}]) // 1w 2w
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'w', p: match1.w }, { h: h2, g: g2, r: 'e', p: match2.e }, {n: 1, c: false, r: 0}]) // 1w 2e
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'w', p: match1.w }, { h: h2, g: g2, r: 'f', p: match2.f }, {n: 1, c: false, r: 0}]) // 1w 2f
+
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'e', p: match1.e }, { h: h2, g: g2, r: 'w', p: match2.w }, {n: 1, c: false, r: 0}]) // 1e 2w
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'e', p: match1.e }, { h: h2, g: g2, r: 'e', p: match2.e }, {n: 1, c: false, r: 0}]) // 1e 2e
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'e', p: match1.e }, { h: h2, g: g2, r: 'f', p: match2.f }, {n: 1, c: false, r: 0}]) // 1e 2f
+
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'f', p: match1.f }, { h: h2, g: g2, r: 'w', p: match2.w }, {n: 1, c: false, r: 0}]) // 1f 2w
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'f', p: match1.f }, { h: h2, g: g2, r: 'e', p: match2.e }, {n: 1, c: false, r: 0}]) // 1f 2e
+            $scope.choosedMatches.push([{ h: h1, g: g1, r: 'f', p: match1.f }, { h: h2, g: g2, r: 'f', p: match2.f }, {n: 1, c: false, r: 0}]) // 1f 2f
+
+            $scope.calc()
+
+            $scope.techs = []
+            _.map([h1, g1, h2, g2], tname => {
+                $http.get('./api/getTech/' + tname)
+                    .then(function(data){
+                        $scope.techs.push(data.data)
+                    })
+                    .catch(function(err){
+                        console.error(err)
+                    })
+            })
+            
+        }
+
+        $scope.calc = function(){
+            $scope.input = $scope.output = 0
+            $scope.getReturnPersent = '0.00%'
+            var input = 0, output = { max: -1, min: 999999}
+            var total = $scope.choosedMatches.length
+            var picked = 0
+
+            _.map($scope.choosedMatches, function(match){
+                var m1 = match[0], m2 = match[1], n = match[2]
+                if(!n.c) {
+                    n.r = 0
+                    // output.min = 0
+                    return
+                }
+                picked += 1
+                var rate = m1.p * m2.p  // get the rate
+                input += n.n * 2        // sum the forecast
+                n.r = n.n * 2 * rate    // calc the single return
+                output.max = (n.r > output.max)? n.r : output.max
+                output.min = (n.r < output.min)? n.r : output.min
+            })
+            $scope.getReturnPersent = ((picked/total) * 100.00).toFixed(2) + '%'
+            $scope.input = input
+            if( input == 0){
+                $scope.output = '--'
+            }else{
+                $scope.output = output.min.toFixed(2) + '--' + output.max.toFixed(2)
+            }
+            
+        }
+    })
+</script>{% endraw %}
+    </body>
+</html>

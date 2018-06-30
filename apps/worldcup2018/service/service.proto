@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package worldcup;
+
+service WorldCup {
+  rpc GetGroupTeams (Data) returns (Data) {}
+}
+
+message Data {
+  string text = 1;
+}
