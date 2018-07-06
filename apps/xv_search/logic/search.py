@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, time, re
+from operator import itemgetter, attrgetter
 from libs.kit import *
 from lxml import etree
 
@@ -38,11 +39,52 @@ VIDEO_PREFIX = 'http://xvideos.sexcache.net'
 regex_http = re.compile(r'(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\/\\\+&amp;%\$#_=]*)?')
 regex_video_mp4 = re.compile(r'setVideoUrlHigh\(\'[\S^\)]+\'\)')
 LIMIT = 24
+
+
 class XvSearchLogic(object):
     def __init__(self):
-        pass
+        self._keywords = { 'jav bj': 3, '91kk哥': 2, 'pron': 1}
+        self._top3 = [ 'jav bj', '91kk哥', 'pron' ]
+
+    def push_keyword(self, keyword):
+
+        lower = keyword.lower()
+        if lower in self._keywords:
+            self._keywords[lower] = self._keywords[lower] + 1
+        else:
+            self._keywords[lower] = 1
+        self.rank_keywords([lower, self._keywords[lower]])
+        # TODO:drop the last entry if length 500
+
+    def rank_keywords(self, entry):
+        key = entry[0]
+        num = entry[1]
+        flag = False
+        index = -1
+        counter_list = []
+        if key in self._top3:
+            # sort the top3
+            for top in self._top3:
+                counter_list.append([self._keywords[top], top])
+            counter_list = sorted(counter_list, key = itemgetter(0, 1), reverse = True)
+            # reset the ranklist
+            for i in range(3):
+                self._top3[i] = counter_list[i][1]
+        else:    
+            # change a top3
+            # should > the last one
+            last_one = self._top3[2]
+            last_one_count = self._keywords[last_one]
+            if num >= last_one_count:
+                self._top3[2] = key
+            
+    def get_top3_keywords(self):
+        return self._top3
 
     def do_search(self, keywords = 'japan+blowjob', page = 0):
+        # if page is 0 means ,it's an new search, we should sort the keywords
+        if page == 0:
+            self.push_keyword(keywords)
         html = download(URL + keywords + '&p=' + str(page))
         total = 0
         max_page = 0

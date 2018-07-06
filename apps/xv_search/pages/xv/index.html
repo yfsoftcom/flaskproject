@@ -7,10 +7,15 @@
       <meta name="x5-orientation" content="portrait">
       <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
       <style>
-          .form-control{
-              width: 50%;
-          }
-          
+        .form-control{
+            width: 50%;
+        }
+        .button-xs{
+            height: 22px;
+            line-height: 22px;
+            font-size: 12px;
+            padding: 0 6px;
+        }
         .img-box{
             position: relative;
             padding-bottom: 70%;
@@ -61,7 +66,8 @@
           .modal{
               max-width: 100%;
           }
-          .modal-title{
+          .modal-head .modal-title{
+              font-size: 14px;
               margin-bottom: 0; height: 1em; line-height: 1em;
           }
           .progress-bar{
@@ -90,13 +96,15 @@
                     </div>
                     <div>
                         <video width="100%" height="auto" controls="controls">
-                            <source ng-if="showModal" src="{{movie.origin_mp4}}" type="video/mp4" />
+                            <source ng-if="showModal" ng-src="{{movie.origin_mp4}}" type="video/mp4" />
                             Your browser does not support the video tag.
                         </video>
                     </div>
                     <div class="modal-footer">
-                        <button class="button-danger-outlined" ng-click="closeModal()">Close</button>
+                        <button class="button-danger-outlined button-xs" ng-click="closeModal()">Close</button>
+                        <button class="button-success-outlined button-xs float-right" ng-click="star()">Star</button>
                     </div>
+                    <div class="clear-fix"></div>
                 </div>
             </div>
             <header>
@@ -107,6 +115,12 @@
                     </div>
                 </p>
                 <p class="disclaimer">Type keywords, Then press [Enter]</p>
+                <ul class="tags">
+                    <li class="tag tag-red tag-rounded" 
+                      ng-class="{0:'tag-red',1:'tag-orange',2:'tag-green'}[$index]"
+                      ng-click="searchTag(tag)"
+                      ng-repeat="tag in tags" ng-bind="tag"></li>
+                </ul>
                 <a class="scroll-down" href="#result" ng-if="hasResult"></a>                
             </header>
             <main>
@@ -139,9 +153,17 @@
         $scope.progressing = false
         $scope.showModal = false
         $scope.movie = {}
+        $scope.tags = ['jav bj', '91kk哥', 'porn']
+        $http.get(`./api/top3`)
+                .then(function(rsp){
+                    $scope.tags = rsp.data
+                })
+                .catch(function(err){
+                    console.error(err)
+                })
         $scope.keypress = function(ev) { 
             if (ev.keyCode !== 13) return;
-            $scope.result = { rows: [], pagination: { current: 0 }}
+            clean()
             search($scope.keywords)
         }
         $scope.next = function() {
@@ -165,6 +187,14 @@
                 .catch(function(err){
                     $scope.progressing = false
                 })
+        }
+        $scope.searchTag = function(tag){
+            clean()
+            $scope.keywords = tag
+            search(tag)
+        }
+        var clean = function(){
+            $scope.result = { rows: [], pagination: { current: 0 }}
         }
         var search = function(keywords, p){
             

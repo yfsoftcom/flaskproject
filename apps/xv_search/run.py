@@ -18,6 +18,12 @@ def api_search_by_page(page, keyword):
     data = logic.do_search(keyword, page)
     return jsonify(data)
 
+# http://localhost:5000/api/top3
+@xv.route('/api/top3')
+def api_get_top3_search_keywords():
+    data = logic.get_top3_keywords()
+    return jsonify(data)
+
 # http://localhost:5000/api/video/video34542905-mothers_fucked_in_front_of_their_daughters
 @xv.route('/api/video/<url>')
 def api_get_video(url):
