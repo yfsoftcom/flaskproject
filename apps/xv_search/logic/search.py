@@ -40,11 +40,35 @@ regex_http = re.compile(r'(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0
 regex_video_mp4 = re.compile(r'setVideoUrlHigh\(\'[\S^\)]+\'\)')
 LIMIT = 24
 
+CACHE_DURATION = 6 * 60 * 60 * 1000 # 6 hours
 
 class XvSearchLogic(object):
     def __init__(self):
         self._keywords = { 'jav bj': 3, '91kk哥': 2, 'pron': 1}
         self._top3 = [ 'jav bj', '91kk哥', 'pron' ]
+        self._mem_cache = {}
+
+    def get_cache(self, key):
+        if key in self._mem_cache:
+            data = self._mem_cache[key]
+            if data['valid_time'] < current_milli_time(): # un valid
+                return False
+            return data['document']
+        return False
+
+    def clean_cache(self):
+        now = current_milli_time()
+        for key, cache in self._mem_cache.items():
+            if cache['valid_time'] < now:
+                self._mem_cache.pop(key)
+
+    def set_cache(self, key, document):
+        self._mem_cache[key] = {
+            'valid_time': current_milli_time() + CACHE_DURATION,
+            'document': document
+        }
+        # TODO: drop the early cache
+        self.clean_cache()
 
     def push_keyword(self, keyword):
 
@@ -85,6 +109,11 @@ class XvSearchLogic(object):
         # if page is 0 means ,it's an new search, we should sort the keywords
         if page == 0:
             self.push_keyword(keywords)
+        cache_key = keywords + '-' + str(page)
+        cache_document = self.get_cache(cache_key)
+        if cache_document:
+            return cache_document
+
         html = download(URL + keywords + '&p=' + str(page))
         total = 0
         max_page = 0
@@ -118,7 +147,9 @@ class XvSearchLogic(object):
             # https://images-llnw.xvideos-cdn.com/videos/videopreview/8b/35/e3/8b35e3b9b528424a33a33d365bd9387b_169.mp4
             self._data.append(data)
 
-        return {'keywords': keywords, 'pagination': { 'current': int(page), 'max': max_page , 'total': total}, 'rows': self._data }
+        cache_document = {'keywords': keywords, 'pagination': { 'current': int(page), 'max': max_page , 'total': total}, 'rows': self._data }
+        self.set_cache(cache_key, cache_document)
+        return cache_document
 
     def get_video(self, href):
         if not str_include(VIDEO_PREFIX, href):
