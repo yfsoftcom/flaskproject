@@ -96,13 +96,13 @@
                     </div>
                     <div>
                         <video width="100%" height="auto" controls="controls">
-                            <source ng-if="showModal" ng-src="{{movie.origin_mp4}}" type="video/mp4" />
+                            <source ng-if="showModal" ng-src="{{movie.src}}" type="video/mp4" />
                             Your browser does not support the video tag.
                         </video>
                     </div>
                     <div class="modal-footer">
                         <button class="button-danger-outlined button-xs" ng-click="closeModal()">Close</button>
-                        <button class="button-success-outlined button-xs float-right" ng-click="star()">Star</button>
+                        <button class="button-success-outlined button-xs float-right" ng-click="star(movie)">Star {{ movie.star }}</button>
                     </div>
                     <div class="clear-fix"></div>
                 </div>
@@ -174,9 +174,15 @@
             $scope.movie = {}
             $scope.showModal = false
         }
+        $scope.star = function(movie) {
+            $http.get(`./api/star/${movie.id}`)
+                .then(function(rsp){
+                    movie.star++
+                })
+        }
         $scope.show = function(row) {
             $scope.progressing = true
-            $http.get(`./api/video/${row.short_href}`)
+            $http.get(`./api/video/${row.id}/${row.short_href}`)
                 .then(function(rsp){
                     var data = rsp.data
                     $scope.movie.title = row.title

@@ -5,8 +5,13 @@ It can search xxx from a xxxx.video.com.
 
 ## TODO:
 - [x] Add Top 3 Hot Search Keywords
-- [ ] Drop the last entry if length > 500 of the search_keywords map
+- ~[ ] Drop the last entry if length > 500 of the search_keywords map~ Use Sqlite3
 - [x] Cache The Search Result For 6 hours
-- [ ] Add Star Button For Video
+- [x] Add Star Button For Video
+
+
 
 ## Use Redis?
+No! Use Sqlite3
+
+- [x] Use Sqlite3 To Save Datas

@@ -11,3 +11,4 @@ snap/*.png
 .DS_Store
 *.exe
 ngrok
+*.db
