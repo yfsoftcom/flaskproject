@@ -180,6 +180,15 @@ class XvSearchLogic(object):
         cursor.close()
         return top3
 
+    def get_hot_rank(self):
+        cursor = self._conn.cursor()
+        cursor.execute('select * from x_videos order by star desc limit 10 offset 0')
+        hot_rank = []
+        for row in cursor:
+            hot_rank.append({ 'id': row[0], 'src': row[1], 'title': row[2], 'star': row[3] })
+        cursor.close()
+        return hot_rank
+
     def do_search(self, keywords = 'japan+blowjob', page = 0):
         # if page is 0 means ,it's an new search, we should sort the keywords
         if page == 0:

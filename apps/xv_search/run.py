@@ -39,3 +39,13 @@ def api_star_video(vid):
 @xv.route('/changelog')
 def changelog():
     return render_template('xv/changelog.html')
+
+
+@xv.route('/hot')
+def hot():
+    return render_template('xv/hot.html')
+
+@xv.route('/api/hot_rank')
+def api_get_hot_rank():
+    data = logic.get_hot_rank()
+    return jsonify(data)
