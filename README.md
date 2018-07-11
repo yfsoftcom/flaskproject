@@ -9,6 +9,12 @@
 python -m unittest discover -s test -v -p *.py
 ```
 
+- Test Libs
+```bash
+cd apps
+python -m unittest discover -s libs\test -v -p *.py
+```
+
 ### Run Docker
 ```bash
 docker-compose up --build -d

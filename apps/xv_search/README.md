@@ -8,7 +8,7 @@ It can search xxx from a xxxx.video.com.
 - ~[ ] Drop the last entry if length > 500 of the search_keywords map~ Use Sqlite3
 - [x] Cache The Search Result For 6 hours
 - [x] Add Star Button For Video
-
+- [ ] The MP4 src unused after serval hours
 
 
 ## Use Redis?

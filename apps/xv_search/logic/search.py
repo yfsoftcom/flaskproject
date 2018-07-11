@@ -3,7 +3,7 @@ import os, time, re, json
 from operator import itemgetter, attrgetter
 from libs.kit import *
 from lxml import etree
-import sqlite3
+from libs.sqlite import Sqlite3Helper
 
 URL = 'http://xvideos.sexcache.net/?k='
 VIDEO_PREFIX = 'http://xvideos.sexcache.net'
@@ -63,89 +63,55 @@ CREATE_TABLE_VIDEOS_CMD = '''create table if not exists x_videos(
 
 class XvSearchLogic(object):
     def __init__(self):
-        self._conn = sqlite3.connect('test.db', check_same_thread = False)
+        self._sqlhelper = Sqlite3Helper()
+        self._sqlhelper.connect_db('test.db')
         self.init_db()
 
     def __del__(self):
-        self._conn.close()
+        self._sqlhelper.close()
 
     def init_db(self):
-        cursor = self._conn.cursor()
+        self._sqlhelper.begin_trans()
         # create table
-        cursor.execute(CREATE_TABLE_SEARCH_KEYWORDS_RECORD_CMD)
-        cursor.execute(CREATE_TABLE_SEARCH_CACHE_CMD)
-        cursor.execute(CREATE_TABLE_VIDEOS_CMD)
-        self._conn.commit()
+        self._sqlhelper.execute(CREATE_TABLE_SEARCH_KEYWORDS_RECORD_CMD)
+        self._sqlhelper.execute(CREATE_TABLE_SEARCH_CACHE_CMD)
+        self._sqlhelper.execute(CREATE_TABLE_VIDEOS_CMD)
+        self._sqlhelper.commit()
 
-        cursor.execute('select count(*) from search_keywords_record')
-        num = cursor.fetchone()[0]
-        if num == 0:
-            cursor.execute("insert into search_keywords_record values (?, ?)", ('jav bj', 3))
-            cursor.execute("insert into search_keywords_record values (?, ?)", ('91kk哥', 2))
-            cursor.execute("insert into search_keywords_record values (?, ?)", ('pron', 1))
-
-        self._conn.commit()
-        cursor.close()
+        num, e = self._sqlhelper.find_one('select count(*) from search_keywords_record')
+        if num[0] == 0:
+            self._sqlhelper.begin_trans()
+            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('jav bj', 3))
+            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('91kk哥', 2))
+            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('pron', 1))
+            self._sqlhelper.commit()
 
     def get_cache(self, key):
-        cursor = self._conn.cursor()
-        cursor.execute("select cache_document from search_cache where cache_key=?", (key,))
-        cache = cursor.fetchone()
-        cursor.close()
+        cache, e = self._sqlhelper.find_one("select cache_document from search_cache where cache_key=?", (key,))
         if cache is None:
             return False
         return json.loads(cache[0])
 
-        # if key in self._mem_cache:
-        #     data = self._mem_cache[key]
-        #     if data['valid_time'] < current_milli_time(): # un valid
-        #         return False
-        #     return data['document']
-        # return False
-
     def clean_cache(self):
         now = current_milli_time()
         
-        cursor = self._conn.cursor()
-        cursor.execute("delete from search_cache where valid_time < ?", (now,))
-
-        self._conn.commit()
-        cursor.close()
+        self._sqlhelper.execute("delete from search_cache where valid_time < ?", (now,))
 
     def set_cache(self, key, document):
-        cursor = self._conn.cursor()
-        cursor.execute("insert into search_cache values (?, ?, ?)", (key, json.dumps(document), current_milli_time() + CACHE_DURATION))
-
-        self._conn.commit()
-        cursor.close()
-
+        self._sqlhelper.execute("insert into search_cache values (?, ?, ?)", (key, json.dumps(document), current_milli_time() + CACHE_DURATION))
         self.clean_cache()
 
     def push_keyword(self, keyword):
 
         lower = keyword.lower()
-        cursor = self._conn.cursor()
-        
-        cursor.execute('select count(*) as num from search_keywords_record where search_content=\'%s\'' % lower )
+        row, e = self._sqlhelper.find_one('select count(*) as num from search_keywords_record where search_content=\'%s\'' % lower )
         
         # 获得查询结果集:
-        num = cursor.fetchone()[0]
+        num = row[0]
         if num > 0:
-            cursor.execute("update search_keywords_record set counter = counter + 1 where search_content='%s'" % lower )
+            self._sqlhelper.execute("update search_keywords_record set counter = counter + 1 where search_content='%s'" % lower )
         else:
-            cursor.execute("insert into search_keywords_record values (?, ?)", (lower, 1))
-        self._conn.commit()
-        cursor.close()
-        """
-        ### dep 使用sqlite3替换
-        #### 
-        if lower in self._keywords:
-            self._keywords[lower] = self._keywords[lower] + 1
-        else:
-            self._keywords[lower] = 1
-        self.rank_keywords([lower, self._keywords[lower]])
-        # TODO:drop the last entry if length 500
-        """
+            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", (lower, 1))
 
     """
     def rank_keywords(self, entry):
@@ -172,22 +138,16 @@ class XvSearchLogic(object):
     """
 
     def get_top3_keywords(self):
-        cursor = self._conn.cursor()
-        cursor.execute('select search_content from search_keywords_record order by counter desc limit 3 offset 0')
+        rows, e = self._sqlhelper.find_all('select search_content from search_keywords_record order by counter desc limit 3 offset 0')
         top3 = []
-        for row in cursor:
+        for row in rows:
             top3.append(row[0])
-        cursor.close()
         return top3
 
     def get_hot_rank(self):
-        cursor = self._conn.cursor()
-        cursor.execute('select * from x_videos order by star desc limit 10 offset 0')
-        hot_rank = []
-        for row in cursor:
-            hot_rank.append({ 'id': row[0], 'src': row[1], 'title': row[2], 'star': row[3] })
-        cursor.close()
-        return hot_rank
+        rows, e = self._sqlhelper.find_all('select * from x_videos order by star desc limit 10 offset 0', 
+            fields = ['id', 'src', 'title', 'star'])
+        return rows
 
     def do_search(self, keywords = 'japan+blowjob', page = 0):
         # if page is 0 means ,it's an new search, we should sort the keywords
@@ -237,12 +197,9 @@ class XvSearchLogic(object):
 
     def get_video(self, vid, href):
         vid = int(vid)
-        cursor = self._conn.cursor()
-        cursor.execute("select * from x_videos where id=?", (vid,))
-        row = cursor.fetchone()
-        cursor.close()
+        row, e = self._sqlhelper.find_one("select * from x_videos where id=?", (vid,), fields = ['id', 'src', 'title', 'star'])
         if row is not None:
-            return { 'id': row[0], 'src': row[1], 'title': row[2], 'star': row[3] }
+            return row
         
         if not str_include(VIDEO_PREFIX, href):
             href = VIDEO_PREFIX + '/' + href
@@ -254,19 +211,11 @@ class XvSearchLogic(object):
         r = str_search(video_script, regex_video_mp4)
         if r:
             src = str_search(r, regex_http).strip()
-            cursor = self._conn.cursor()
-            cursor.execute("insert into x_videos values (?, ?, ?, ?)", (vid, src, video_title, 0) )
-            self._conn.commit()
-            cursor.close()
+            self._sqlhelper.execute("insert into x_videos values (?, ?, ?, ?)", (vid, src, video_title, 0) )
             return { 'id': vid, 'src': src, 'title': video_title, 'star': 0 }
         return False
 
     def star(self, vid):
-        cursor = self._conn.cursor()
-
-        cursor.execute("update x_videos set star = star + 1 where id=?", (int(vid), ) )
-        
-        self._conn.commit()
-        cursor.close()
+        self._sqlhelper.execute("update x_videos set star = star + 1 where id=?", (int(vid), ) )
         return {'errno': 0}
 
