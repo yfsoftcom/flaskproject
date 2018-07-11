@@ -112,6 +112,7 @@
             $http.get(`./api/hot_rank`)
                 .then(function(rsp){
                     $scope.result.rows = rsp.data
+                    console.log(rsp.data)
                 })
                 .catch(function(err){
                     console.error(err)

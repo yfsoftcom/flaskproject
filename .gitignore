@@ -12,3 +12,4 @@ snap/*.png
 *.exe
 ngrok
 *.db
+*.*-journal

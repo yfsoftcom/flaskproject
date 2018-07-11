@@ -55,16 +55,21 @@ CREATE_TABLE_SEARCH_CACHE_CMD = '''create table if not exists search_cache(
 
 CREATE_TABLE_VIDEOS_CMD = '''create table if not exists x_videos(
     id int primary key  not null,
-    src text  not null,
-    title text not null,
-    star int  not null);'''
+    short_href text null,
+    src text,
+    title text,
+    valid_time int not null,
+    prev_image text,
+    duration text,
+    views text,
+    star int);'''
 
 
 
 class XvSearchLogic(object):
     def __init__(self):
         self._sqlhelper = Sqlite3Helper()
-        self._sqlhelper.connect_db('test.db')
+        self._sqlhelper.connect_db('xv1.db')
         self.init_db()
 
     def __del__(self):
@@ -145,8 +150,8 @@ class XvSearchLogic(object):
         return top3
 
     def get_hot_rank(self):
-        rows, e = self._sqlhelper.find_all('select * from x_videos order by star desc limit 10 offset 0', 
-            fields = ['id', 'src', 'title', 'star'])
+        rows, e = self._sqlhelper.find_all('select id, src, title, short_href, star from x_videos order by star desc limit 10 offset 0', 
+            fields = ['id', 'src', 'title', 'short_href', 'star'])
         return rows
 
     def do_search(self, keywords = 'japan+blowjob', page = 0):
@@ -189,6 +194,8 @@ class XvSearchLogic(object):
             # data['prev_video'] = div_tree.xpath('//div[@class="thumb"]/a/img/@data-src')[0]
             # https://images-llnw.xvideos-cdn.com/videos/thumbs169/8b/35/e3/8b35e3b9b528424a33a33d365bd9387b/8b35e3b9b528424a33a33d365bd9387b.26.jpg
             # https://images-llnw.xvideos-cdn.com/videos/videopreview/8b/35/e3/8b35e3b9b528424a33a33d365bd9387b_169.mp4
+            self._sqlhelper.execute("update x_videos set short_href = ?, duration = ?, views = ?  where id = ?", 
+                    (data['short_href'], data['duration'], data['views'], int(data['id']) ) )
             self._data.append(data)
 
         cache_document = {'keywords': keywords, 'pagination': { 'current': int(page), 'max': max_page , 'total': total}, 'rows': self._data }
@@ -197,10 +204,15 @@ class XvSearchLogic(object):
 
     def get_video(self, vid, href):
         vid = int(vid)
-        row, e = self._sqlhelper.find_one("select * from x_videos where id=?", (vid,), fields = ['id', 'src', 'title', 'star'])
+        now = current_milli_time()
+        is_include = False
+        row, e = self._sqlhelper.find_one("select id, src, title, star, valid_time from x_videos where id=?", (vid,), 
+            fields = ['id', 'src', 'title', 'star', 'valid_time'])
         if row is not None:
-            return row
-        
+            is_include = True
+            if row['valid_time'] > now:
+                return row
+        short_href = href.replace('/', '-')
         if not str_include(VIDEO_PREFIX, href):
             href = VIDEO_PREFIX + '/' + href
         video_html = download(href)
@@ -211,7 +223,12 @@ class XvSearchLogic(object):
         r = str_search(video_script, regex_video_mp4)
         if r:
             src = str_search(r, regex_http).strip()
-            self._sqlhelper.execute("insert into x_videos values (?, ?, ?, ?)", (vid, src, video_title, 0) )
+            if is_include:
+                self._sqlhelper.execute("update x_videos set src = ?, valid_time = ? where id = ?", 
+                    (src, now + CACHE_DURATION, vid) )
+            else:
+                self._sqlhelper.execute("insert into x_videos (id, src, short_href, title, star, valid_time) values (?, ?, ?, ?, ?, ?)", 
+                    (vid, src, short_href, video_title, 0, now + CACHE_DURATION) )
             return { 'id': vid, 'src': src, 'title': video_title, 'star': 0 }
         return False
 
