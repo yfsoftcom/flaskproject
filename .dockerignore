@@ -3,3 +3,5 @@ foo.py
 *.pyc
 __pycache__/
 ngrok
+*.db
+*.db-journal
