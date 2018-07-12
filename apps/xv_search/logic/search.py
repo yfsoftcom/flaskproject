@@ -43,6 +43,8 @@ LIMIT = 24
 
 CACHE_DURATION = 6 * 60 * 60 * 1000 # 6 hours
 
+ONE_HOUR = 60 * 60 * 1000 # 1h
+
 CREATE_TABLE_SEARCH_KEYWORDS_RECORD_CMD = '''create table if not exists search_keywords_record(
     search_content text primary key  not null,
     counter        int  not null);'''
@@ -225,10 +227,10 @@ class XvSearchLogic(object):
             src = str_search(r, regex_http).strip()
             if is_include:
                 self._sqlhelper.execute("update x_videos set src = ?, valid_time = ? where id = ?", 
-                    (src, now + CACHE_DURATION, vid) )
+                    (src, now + ONE_HOUR, vid) )
             else:
                 self._sqlhelper.execute("insert into x_videos (id, src, short_href, title, star, valid_time) values (?, ?, ?, ?, ?, ?)", 
-                    (vid, src, short_href, video_title, 0, now + CACHE_DURATION) )
+                    (vid, src, short_href, video_title, 0, now + ONE_HOUR) )
             return { 'id': vid, 'src': src, 'title': video_title, 'star': 0 }
         return False
 
