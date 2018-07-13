@@ -41,9 +41,9 @@ regex_http = re.compile(r'(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0
 regex_video_mp4 = re.compile(r'setVideoUrlHigh\(\'[\S^\)]+\'\)')
 LIMIT = 24
 
-CACHE_DURATION = 6 * 60 * 60 * 1000 # 6 hours
+CACHE_DURATION = 6 * 60 * 60  # 6 hours
 
-ONE_HOUR = 60 * 60 * 1000 # 1h
+ONE_HOUR = 60 * 60  # 1h
 
 CREATE_TABLE_SEARCH_KEYWORDS_RECORD_CMD = '''create table if not exists search_keywords_record(
     search_content text primary key  not null,
