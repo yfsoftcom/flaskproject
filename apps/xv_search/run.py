@@ -15,7 +15,7 @@ def index():
 
 @xv.route('/api/search/p/<page>/<keyword>')
 def api_search_by_page(page, keyword):
-    data = logic.do_search(keyword, page)
+    data = logic.do_search(keyword, int(page))
     return jsonify(data)
 
 # http://localhost:5000/api/top3
