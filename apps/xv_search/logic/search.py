@@ -120,36 +120,9 @@ class XvSearchLogic(object):
         else:
             self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", (lower, 1))
 
-    """
-    def rank_keywords(self, entry):
-        key = entry[0]
-        num = entry[1]
-        flag = False
-        index = -1
-        counter_list = []
-        if key in self._top3:
-            # sort the top3
-            for top in self._top3:
-                counter_list.append([self._keywords[top], top])
-            counter_list = sorted(counter_list, key = itemgetter(0, 1), reverse = True)
-            # reset the ranklist
-            for i in range(3):
-                self._top3[i] = counter_list[i][1]
-        else:    
-            # change a top3
-            # should > the last one
-            last_one = self._top3[2]
-            last_one_count = self._keywords[last_one]
-            if num >= last_one_count:
-                self._top3[2] = key
-    """
-
     def get_top3_keywords(self):
         rows, e = self._sqlhelper.find_all('select search_content from search_keywords_record order by counter desc limit 3 offset 0')
-        top3 = []
-        for row in rows:
-            top3.append(row[0])
-        return top3
+        return [ x[0] for x in rows ]
 
     def get_hot_rank(self):
         rows, e = self._sqlhelper.find_all('select id, src, title, short_href, star from x_videos order by star desc limit 10 offset 0', 
