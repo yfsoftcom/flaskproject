@@ -13,3 +13,4 @@ snap/*.png
 ngrok
 *.db
 *.*-journal
+mysqldata
