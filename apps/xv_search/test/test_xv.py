@@ -10,19 +10,21 @@ class TestXvSearchLogic(unittest.TestCase):
     """Test TestXvSearchLogic"""
 
     def test_search(self):
-        logic.do_search('jav bj')
-        logic.do_search('jav bj')
-        logic.do_search('jav ass')
-        logic.do_search('jav ass')
-        logic.do_search('jav bj')
-        self.assertEqual(logic.get_top3_keywords()[0], 'jav bj')
-        self.assertEqual(logic.get_top3_keywords()[1], 'jav ass')
+        logic.do_search('pov jav bj')
+        logic.do_search('pov jav bj')
+        logic.do_search('pov jav ass')
+        logic.do_search('pov jav ass')
+        logic.do_search('pov jav bj')
+        logic.do_search('pov jav bj')
+        logic.do_search('pov jav bj')
+        self.assertEqual(logic.get_top3_keywords()[0], 'pov jav bj')
+        self.assertEqual(logic.get_top3_keywords()[1], 'pov jav ass')
         logic.do_search('jav bj', 1)
         logic.do_search('jav bj', 2)
         logic.do_search('jav bj', 3)
         logic.do_search('jav ass')
         logic.do_search('jav ass')
-        self.assertEqual(logic.get_top3_keywords()[0], 'jav bj')
+        self.assertEqual(logic.get_top3_keywords()[0], 'pov jav bj')
 
     def test_cache(self):
         logic.do_search('jav bj')

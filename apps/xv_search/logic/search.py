@@ -88,8 +88,8 @@ class XvSearchLogic(object):
         num, e = self._sqlhelper.find_one('select count(*) from search_keywords_record')
         if num[0] == 0:
             self._sqlhelper.begin_trans()
-            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('jav bj', 3))
-            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('91kk哥', 2))
+            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('jav bj', 1))
+            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('91kk哥', 1))
             self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('pron', 1))
             self._sqlhelper.commit()
 
@@ -111,12 +111,12 @@ class XvSearchLogic(object):
     def push_keyword(self, keyword):
 
         lower = keyword.lower()
-        row, e = self._sqlhelper.find_one('select count(*) as num from search_keywords_record where search_content=\'%s\'' % lower )
+        row, e = self._sqlhelper.find_one('select count(*) as num from search_keywords_record where search_content=?', (lower,) )
         
         # 获得查询结果集:
         num = row[0]
         if num > 0:
-            self._sqlhelper.execute("update search_keywords_record set counter = counter + 1 where search_content='%s'" % lower )
+            self._sqlhelper.execute("update search_keywords_record set counter = counter + 1 where search_content=?", (lower, ) )
         else:
             self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", (lower, 1))
 
