@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """The Python implementation of the GRPC worldcup.Greeter server."""
 
 from concurrent import futures
@@ -15,7 +16,7 @@ class WorldCup(service_pb2_grpc.WorldCupServicer):
 
     def GetGroupTeams(self, request, context):
         # print('OK', request.text)
-        return service_pb2.Data("aa")
+        return service_pb2.Data(text = "aa %s" % request.text)
 
 
 def serve():
