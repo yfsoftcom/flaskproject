@@ -17,7 +17,7 @@ python -m unittest discover -s libs\test -v -p *.py
 
 ### Run Docker
 ```bash
-docker-compose up --build -d
+docker-compose -f docker-compose.dev.yml up --build -d
 ```
 
 ### Run Ngrok
