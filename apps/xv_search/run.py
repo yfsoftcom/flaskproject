@@ -28,10 +28,9 @@ def api_get_top3_search_keywords():
     return jsonify(data)
 
 # http://localhost:5000/api/video/34542905/video34542905-mothers_fucked_in_front_of_their_daughters
-@xv.route('/api/video/<vid>/<url>')
-def api_get_video(vid, url):
-    url = url.replace('-', '/')
-    data = logic.get_video(vid, url)
+@xv.route('/api/video/<vid>')
+def api_get_video(vid):
+    data = logic.get_video(vid)
     return jsonify(data)
 
 @xv.route('/api/star/<vid>')

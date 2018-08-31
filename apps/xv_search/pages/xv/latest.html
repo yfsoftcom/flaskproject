@@ -186,7 +186,7 @@
         }
         $scope.show = function(row) {
             $scope.progressing = true
-            $http.get(`./api/video/${row.id}/${row.short_href}`)
+            $http.get(`./api/video/${row.id}`)
                 .then(function(rsp){
                     var data = rsp.data
                     $scope.movie.title = row.title

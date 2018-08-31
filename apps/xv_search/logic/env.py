@@ -12,6 +12,8 @@ else:
 URL = DOMAIN + '/?k='
 VIDEO_PREFIX = DOMAIN
 
+VIDEO_FRAME = DOMAIN + '/embedframe/'
+
 VERSION = '1.0.0'
 
 print('NET_MODE is %s, URL: %s, VIDEO_PREFIX: %s' % (NET_MODE, URL, VIDEO_PREFIX))

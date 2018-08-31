@@ -4,7 +4,7 @@ from operator import itemgetter, attrgetter
 from libs.kit import *
 from lxml import etree
 from libs.sqlite import Sqlite3Helper
-from .env import URL, VIDEO_PREFIX
+from .env import URL, VIDEO_PREFIX, VIDEO_FRAME
 
 """
 <div id="video_34542905" class="thumb-block ">
@@ -55,7 +55,6 @@ CREATE_TABLE_SEARCH_CACHE_CMD = '''create table if not exists search_cache(
 
 CREATE_TABLE_VIDEOS_CMD = '''create table if not exists x_videos(
     id int primary key  not null,
-    short_href text null,
     src text,
     title text,
     valid_time int not null,
@@ -123,8 +122,8 @@ class XvSearchLogic(object):
         return [ x[0] for x in rows ]
 
     def get_hot_rank(self):
-        rows, e = self._sqlhelper.find_all('select id, src, title, short_href, star from x_videos order by star desc limit 10 offset 0', 
-            fields = ['id', 'src', 'title', 'short_href', 'star'])
+        rows, e = self._sqlhelper.find_all('select id, src, title, star from x_videos order by star desc limit 10 offset 0', 
+            fields = ['id', 'src', 'title', 'star'])
         return rows
 
     def do_search(self, keywords = 'japan+blowjob', page = 0):
@@ -154,7 +153,6 @@ class XvSearchLogic(object):
             data = {}
             div_tree = etree.ElementTree(div)
             data['href'] = VIDEO_PREFIX + div_tree.xpath('//div[@class="thumb"]/a/@href')[0]
-            data['short_href'] = div_tree.xpath('//div[@class="thumb"]/a/@href')[0].strip('/').replace('/', '-')
             data['prev_image'] = div_tree.xpath('//div[@class="thumb"]/a/img/@data-src')[0]
             data['id'] = div_tree.xpath('//div[@class="thumb"]/a/img/@data-videoid')[0]
             data['title'] = div_tree.xpath('//p/a/@title')[0]
@@ -167,15 +165,15 @@ class XvSearchLogic(object):
             # data['prev_video'] = div_tree.xpath('//div[@class="thumb"]/a/img/@data-src')[0]
             # https://images-llnw.xvideos-cdn.com/videos/thumbs169/8b/35/e3/8b35e3b9b528424a33a33d365bd9387b/8b35e3b9b528424a33a33d365bd9387b.26.jpg
             # https://images-llnw.xvideos-cdn.com/videos/videopreview/8b/35/e3/8b35e3b9b528424a33a33d365bd9387b_169.mp4
-            self._sqlhelper.execute("update x_videos set short_href = ?, duration = ?, views = ?  where id = ?", 
-                    (data['short_href'], data['duration'], data['views'], int(data['id']) ) )
+            self._sqlhelper.execute("update x_videos set duration = ?, views = ?  where id = ?", 
+                    (data['duration'], data['views'], int(data['id']) ) )
             self._data.append(data)
 
         cache_document = {'keywords': keywords, 'pagination': { 'current': int(page), 'max': max_page , 'total': total}, 'rows': self._data }
         self.set_cache(cache_key, cache_document)
         return cache_document
 
-    def get_video(self, vid, href):
+    def get_video(self, vid):
         vid = int(vid)
         now = current_milli_time()
         is_include = False
@@ -185,14 +183,10 @@ class XvSearchLogic(object):
             is_include = True
             if row['valid_time'] > now:
                 return row
-        short_href = href.replace('/', '-')
-        if not str_include(VIDEO_PREFIX, href):
-            href = VIDEO_PREFIX + '/' + href
-        video_html = download(href)
+        video_html = download(VIDEO_FRAME + str(vid))
         root = etree.ElementTree(etree.HTML(video_html))
         video_title = root.xpath('//title')[0].text
-        video_script = root.xpath('//div[@id="video-player-bg"]/script')[3].text
-        
+        video_script = root.xpath('//body/script')[4].text
         r = str_search(video_script, regex_video_mp4)
         if r:
             src = str_search(r, regex_http).strip()
@@ -200,8 +194,8 @@ class XvSearchLogic(object):
                 self._sqlhelper.execute("update x_videos set src = ?, valid_time = ? where id = ?", 
                     (src, now + ONE_HOUR, vid) )
             else:
-                self._sqlhelper.execute("insert into x_videos (id, src, short_href, title, star, valid_time) values (?, ?, ?, ?, ?, ?)", 
-                    (vid, src, short_href, video_title, 0, now + ONE_HOUR) )
+                self._sqlhelper.execute("insert into x_videos (id, src, title, star, valid_time) values (?, ?, ?, ?, ?)", 
+                    (vid, src, video_title, 0, now + ONE_HOUR) )
             return { 'id': vid, 'src': src, 'title': video_title, 'star': 0 }
         return False
 
