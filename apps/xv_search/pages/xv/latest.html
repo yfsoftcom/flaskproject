@@ -1,20 +1,63 @@
 <html>
     <head>
-      <title>Xv Hot Rank</title>
+      <title>Xv Latest Update</title>
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <meta http-equiv="X-UA-Compatible" content="ie=edge">
       <meta name="x5-orientation" content="portrait">
       <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
       <style>
-            .button-xs{
-                height: 22px;
-                line-height: 22px;
-                font-size: 12px;
-                padding: 0 6px;
-            }
-            h6,.no-break{
-              font-size: 16px;
+        .form-control{
+            width: 50%;
+        }
+        .button-xs{
+            height: 22px;
+            line-height: 22px;
+            font-size: 12px;
+            padding: 0 6px;
+        }
+        .img-box{
+            position: relative;
+            padding-bottom: 70%;
+        }
+        .img-box img{
+            position:absolute;
+            top:0;
+            bottom:0;
+            left:0;
+            right:0;
+            width:100%;
+            margin:auto;
+        }
+        img:after {  
+            content: "\f1c5" " " attr(alt);
+           
+            font-size: 16px;
+            font-family: FontAwesome;
+            color: rgb(100, 100, 100);
+           
+            display: block;
+            position: absolute;
+            z-index: 2;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+          }
+          
+          .center{
+              margin: 1em auto;
+          }
+          .block{
+              display: block;
+          }
+          
+          .card{
+              overflow: hidden; padding: 10px; margin: 5px;
+          }
+          h6,.no-break{
+              font-size: 12px;
               height: 2em;
               overflow: hidden;
               text-overflow:ellipsis;
@@ -35,6 +78,10 @@
           .progress-bar>span{
               border-radius: 0;
           }
+          input[type="text"], input[type="password"], select {
+              border-radius: 0;
+              border: 2px solid #996666;
+          }
           .mobile-menu {
             display: block;
             position: absolute;
@@ -42,7 +89,7 @@
             right: 30px;
             z-index: 10;
           }
-        </style>
+      </style>
     </head>
     <body ng-app="app">{% raw %}
         <div ng-controller="MainControll" ng-cloak>
@@ -74,29 +121,30 @@
                     </div>
                     <ul class="nav-links">
                         <li><a href="./">Home</a></li>
-                        <li><a href="./latest">Latest</a></li>
+                        <li><a href="./hot">Hot</a></li>
                         <li><a class="" href="./changelog">Changelog</a></li>
                     </ul>
                     <a class="mobile-menu-toggle" ng-click="showMobileMenu = true"></a>
                     <ul class="mobile-menu menu" ng-if="showMobileMenu">
                         <li><a href="./">Home</a></li>
-                        <li><a href="./latest">Latest</a></li>
+                        <li><a href="./hot">Hot</a></li>
                     </ul>
                 </div>
             </nav>
             <main>
                 <div class="container">
-                    <section id="result">
-                        <h2>Hot Top 10</h2>
-                        <ol>
-                            <li ng-repeat="row in result.rows" >
-                                <a href="" ng-click="show(row)">
-                                    <strong ng-bind="row.title"></strong>
-                                    <span style="color: #333; font-size: 12px;"> &nbsp;&nbsp;&nbsp; {{ row.star }} Stars </span>
-                                </a>
-                            </li>
-                        </ol>
-                    </section>
+                    <h2>Latest</h2>
+                    <div class="row">
+                        <div class="col col-md-3" ng-repeat="row in result.rows">
+                            <div class="card">
+                                <h6 ng-bind="row.title"></h6>
+                                <div class="img-box">
+                                    <img alt="{{row.title}}" class="img" src="" ng-src="{{row.thumb}}" />
+                                </div>
+                                <p><span ng-bind="row.duration"></span> <button class="button-xs button-warning-outlined float-right" ng-click="show(row)">Watch</button></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
@@ -110,22 +158,23 @@
         $scope.progressing = false
         $scope.showModal = false
         $scope.movie = {}
-        $scope.get_hot_rank = function(){
-            $http.get(`./api/hot_rank`)
+        $scope.get_latest = function(){
+            $scope.progressing = true
+            $http.get(`./api/rss`)
                 .then(function(rsp){
                     $scope.result.rows = rsp.data
-                    console.log(rsp.data)
+                    $scope.progressing = false
                 })
                 .catch(function(err){
                     console.error(err)
                 })
         }
-        $scope.get_hot_rank()
+        $scope.get_latest()
 
         $scope.closeModal = function(){
             $scope.movie = {}
             $scope.showModal = false
-            $scope.get_hot_rank()
+            $scope.get_latest()
         }
         $scope.star = function(movie) {
             $http.get(`./api/star/${movie.id}`)

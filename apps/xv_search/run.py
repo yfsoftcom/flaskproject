@@ -2,10 +2,13 @@
 from flask import Blueprint, request, render_template, jsonify
 from libs.kit import *
 from .logic.search import XvSearchLogic
+from .logic.rss import XvRssLogic
 
 xv = Blueprint('xv', __name__, template_folder='pages')
 
 logic = XvSearchLogic()
+
+rss = XvRssLogic()
 
 @xv.route('/')
 def index():
@@ -45,7 +48,16 @@ def changelog():
 def hot():
     return render_template('xv/hot.html')
 
+@xv.route('/latest')
+def latest():
+    return render_template('xv/latest.html')
+
 @xv.route('/api/hot_rank')
 def api_get_hot_rank():
     data = logic.get_hot_rank()
+    return jsonify(data)
+
+@xv.route('/api/rss')
+def api_get_rss():
+    data = rss.parse()
     return jsonify(data)

@@ -4,9 +4,7 @@ from operator import itemgetter, attrgetter
 from libs.kit import *
 from lxml import etree
 from libs.sqlite import Sqlite3Helper
-
-URL = 'http://www.xvideos.com/?k='
-VIDEO_PREFIX = 'http://www.xvideos.com'
+from .env import URL, VIDEO_PREFIX
 
 """
 <div id="video_34542905" class="thumb-block ">

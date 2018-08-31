@@ -13,3 +13,5 @@ requests
 zmq
 simplejson
 tushare
+
+redis

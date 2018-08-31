@@ -20,6 +20,11 @@ python -m unittest discover -s libs\test -v -p *.py
 docker-compose -f docker-compose.dev.yml up --build -d
 ```
 
+Run in product mode
+```bash
+docker-compose up --build -d
+```
+
 ### Run Ngrok
 ```bash
 ngrok http 5555
