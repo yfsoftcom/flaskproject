@@ -24,7 +24,10 @@ Run in product mode
 ```bash
 docker-compose up --build -d
 ```
-
+Run in global mode
+```bash
+docker-compose -f docker-compose.global.yml up --build -d
+```
 ### Run Ngrok
 ```bash
 ngrok http 5555
