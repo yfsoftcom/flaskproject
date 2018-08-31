@@ -32,6 +32,6 @@ class XvRssLogic(object):
             rate = item.findtext('rate')
             thumb = item.findtext('thumb_medium')
             duration = item.findtext('clips/duration')
-            self._datas.append({ 'title': title, 'link': link, 'guid': guid, 'rate': rate, 'thumb': thumb, 'duration': duration})
+            self._datas.append({ 'title': title, 'link': link, 'short_href': link.strip('/').replace('/', '-'), 'id': guid, 'rate': rate, 'thumb': thumb, 'duration': duration})
         self._last_feed_time = NOW
         return self._datas
