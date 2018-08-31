@@ -2,7 +2,7 @@
 import os, time, re, json
 from libs.kit import *
 from lxml import etree
-from .env import URL, VIDEO_PREFIX, RSS_URL
+from .env import URL, VIDEO_PREFIX, RSS_URL, NET_MODE, DOMAIN
 
 from urllib.request import urlopen
 from xml.etree.ElementTree import parse
@@ -27,7 +27,7 @@ class XvRssLogic(object):
         self._datas = []
         for item in doc.iterfind('channel/item'):
             title = item.findtext('title')
-            link = item.findtext('link')
+            link = item.findtext('link').strip(DOMAIN)
             guid = item.findtext('guid')
             rate = item.findtext('rate')
             thumb = item.findtext('thumb_medium')
