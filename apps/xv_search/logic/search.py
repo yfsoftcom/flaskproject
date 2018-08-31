@@ -37,6 +37,7 @@ from .env import URL, VIDEO_PREFIX, VIDEO_FRAME
 
 regex_http = re.compile(r'(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\/\\\+&amp;%\$#_=]*)?')
 regex_video_mp4 = re.compile(r'setVideoUrlHigh\(\'[\S^\)]+\'\)')
+regex_video_title = re.compile(r'setVideoTitle\(\'[ \S^\)]+\'\)')
 LIMIT = 24
 
 CACHE_DURATION = 6 * 60 * 60  # 6 hours
@@ -185,8 +186,10 @@ class XvSearchLogic(object):
                 return row
         video_html = download(VIDEO_FRAME + str(vid))
         root = etree.ElementTree(etree.HTML(video_html))
-        video_title = root.xpath('//title')[0].text
+        # video_title = root.xpath('//title')[0].text
         video_script = root.xpath('//body/script')[4].text
+        video_title = str_search(video_script, regex_video_title)
+        video_title = str_search(video_title, re.compile(r'\'[ \S^\)]+\'')).replace('\'', '')
         r = str_search(video_script, regex_video_mp4)
         if r:
             src = str_search(r, regex_http).strip()
