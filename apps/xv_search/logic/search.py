@@ -36,7 +36,7 @@ from .env import URL, VIDEO_PREFIX, VIDEO_FRAME
 """
 
 regex_http = re.compile(r'(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\/\\\+&amp;%\$#_=]*)?')
-regex_video_mp4 = re.compile(r'setVideoUrlHigh\(\'[\S^\)]+\'\)')
+regex_video_mp4 = re.compile(r'setVideoUrlLow\(\'[\S^\)]+\'\)')
 regex_video_title = re.compile(r'setVideoTitle\(\'[ \S^\)]+\'\)')
 LIMIT = 24
 

@@ -33,20 +33,18 @@ class TestXvSearchLogic(unittest.TestCase):
 
     def test_get_video(self):
         vid = '28605129'
-        href = 'video28605129-_pov_japanese_blowjob_39_-_from_javz.se'.replace('-', '/')
-        data = logic.get_video(vid, href)
+        data = logic.get_video(vid)
         src1 = data['src']
-        data = logic.get_video(vid, href)
+        data = logic.get_video(vid)
         src2 = data['src']
         self.assertEqual(src1, src2)
 
     def test_star(self):
         vid = '28605129'
-        href = 'video28605129-_pov_japanese_blowjob_39_-_from_javz.se'.replace('-', '/')
-        data = logic.get_video(vid, href)
+        data = logic.get_video(vid)
         star1 = data['star']
         logic.star(vid)
-        data = logic.get_video(vid, href)
+        data = logic.get_video(vid)
         star2 = data['star']
         self.assertEqual(star1, star2 - 1)
 
