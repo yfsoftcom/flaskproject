@@ -1,0 +1,83 @@
+<html>
+    <head>
+      <title>Stock</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <meta name="x5-orientation" content="portrait">
+      <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
+      <style>
+          td,th{
+              text-align: center;
+              color: #333;
+              border-left: 1px solid #fff;
+              background: #ccc;
+          }
+          table thead th{
+              background: #3366CC;
+              font-weight: 400;
+              color: #ffffff;
+          }
+      </style>
+
+    </head>
+    <body>
+        <main>
+            <div class="container">
+                <section id="result">
+                    <h2>MyStock</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="8">Keep Stocks</th>
+                            </tr>
+                            <tr>
+                                <th rowspan="2">Total</th>
+                                <th>Amount</th>
+                                <th colspan="2">{{ total.amount }}</th>
+                                <th rowspan="2">Origin</th>
+                                <th>Amount</th>
+                                <th colspan="2">{{ origin.amount }}</th>
+                            </tr>
+                            <tr>
+                                <th>Profit</th>
+                                <th colspan="2">{{ total.profit }}</th>
+                                <th>Rate</th>
+                                <th colspan="2">{{ origin.rate }}%</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Cost</th>
+                                <th>Hands</th>
+                                <th>Amount</th>
+                                <th>Profit</th>
+                                <th>Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stock in stocks %}
+                            <tr>
+                                <td>{{ stock.code }}</td>
+                                <td>{{ stock.name }}</td>
+                                <td>{{ stock.price }}</td>
+                                <td>{{ stock.cost }}</td>
+                                <td>{{ stock.hand }}</td>
+                                <td>{{ stock.amount }}</td>
+                                <td>{{ stock.profit }}</td>
+                                <td>{{ stock.rate }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </body>
+
+</html>
