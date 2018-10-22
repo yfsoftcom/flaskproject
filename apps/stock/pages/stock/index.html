@@ -25,7 +25,10 @@
         <main>
             <div class="container">
                 <section id="result">
-                    <h2>MyStock 10.10</h2>
+                    <h2>MyStock 10.10 <span class="float-right" style="font-size: 12px;"> Update At: <span>1 min ago</span></span></h2>
+                    <p>
+                        <button class="button-primary button-small button-round" id="btn-refresh">Refresh</button>
+                    </p>
                     <table>
                         <thead>
                             <tr>
@@ -85,5 +88,12 @@
             </div>
         </main>
     </body>
-
+    <script>
+        document.querySelector('#btn-refresh').addEventListener('click', function(){
+            window.location.reload();
+        }, false);
+        setInterval(function(){
+            window.location.reload();
+        }, 30 * 1000);
+    </script>
 </html>

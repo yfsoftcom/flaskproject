@@ -5,12 +5,13 @@ from libs.kit import *
 import re,time, datetime
 
 KEEP_STOCKS = [
-    ['sz002938', 2, 9.121],
+    ['sz002938', 1, 0.6],
     ['sh600486', 3, 48.034],
-    ['sz300373', 6, 24.34],
-    ['sz000796', 13, 9.894],
-    ['sz300014', 3, 13.623],
+    ['sz300373', 8, 22.63],
+    ['sz000796', 17, 9.049],
+    ['sz300014', 5, 12.884],
     ['sz002230', 1, 29.1],
+    ['sz002220', 13, 2.887],
 ]
 
 def get_profit():
@@ -18,7 +19,7 @@ def get_profit():
     total = { 'amount': 0.0, 'profit': 0.0 }
     origin = { 'amount': 0.0, 'rate': 0.0 }
     df = ts.get_realtime_quotes([ x[0] for x in KEEP_STOCKS])
-    print(df)
+    # print(df)
     for i in range(0, len(KEEP_STOCKS)):
         stock = KEEP_STOCKS[i]
         row = {}
