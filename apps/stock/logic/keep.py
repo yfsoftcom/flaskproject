@@ -46,3 +46,9 @@ def get_profit():
     origin['amount'] = round(total['amount'] - total['profit'], 2)
     origin['rate'] = round(total['profit'] / origin['amount'] * 100 , 2)
     return rows, total, origin
+
+
+def get_trades():
+    rows = []
+
+    return rows

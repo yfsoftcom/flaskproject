@@ -7,93 +7,188 @@
       <meta name="x5-orientation" content="portrait">
       <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
       <style>
-          td,th{
-              text-align: center;
-              color: #333;
-              border-left: 1px solid #fff;
-              background: #ccc;
-          }
-          table thead th{
-              background: #3366CC;
-              font-weight: 400;
-              color: #ffffff;
-          }
+        td,th{
+          text-align: center;
+          color: #333;
+          border-left: 1px solid #fff;
+          background: #ccc;
+          font-size: 14px;
+          font: 14px/1 Tahoma,Helvetica,Arial,"Microsoft YaHei",sans-serif;
+        }
+        a{
+          color:#333;
+          text-decoration: underline;
+        }
+        table tbody td{
+          padding: 4px;
+        }
+        table thead th{
+          background: #3366CC;
+          font-weight: 400;
+          color: #ffffff;
+        }
+        button.button-no-margin {
+          margin: 0;
+        }
+        .progress-bar{
+          margin: 0px;
+          border-radius: 0px;
+          height: 8px;
+        }
+        .red{
+          color: red;
+        }
+        .green{
+          color: green;
+        }
+
       </style>
 
     </head>
-    <body>
-        <main>
-            <div class="container">
-                <section id="result">
-                    <h2>MyStock 10.10 <span class="float-right" style="font-size: 12px;"> Update At: <span>1 min ago</span></span></h2>
-                    <p>
-                        <button class="button-primary button-small button-round" id="btn-refresh">Refresh</button>
-                    </p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th colspan="8">Keep Stocks</th>
-                            </tr>
-                            <tr>
-                                <th rowspan="2">Total</th>
-                                <th>Amount</th>
-                                <th colspan="2">{{ total.amount }}</th>
-                                <th rowspan="2">Origin</th>
-                                <th>Amount</th>
-                                <th colspan="2">{{ origin.amount }}</th>
-                            </tr>
-                            <tr>
-                                <th>Profit</th>
-                                <th colspan="2">{{ total.profit }}</th>
-                                <th>Rate</th>
-                                <th colspan="2">{{ origin.rate }}%</th>
-                            </tr>
-                        </thead>
-                    </table>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Price</th>
-                                <th>Pre</th>
-                                <th>PriceRate</th>
-                                <th>Vol</th>
-                                <th>Cost</th>
-                                <th>Hands</th>
-                                <th>Amount</th>
-                                <th>Profit</th>
-                                <th>Rate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for stock in stocks %}
-                            <tr>
-                                <td>{{ stock.code }}</td>
-                                <td>{{ stock.name }}</td>
-                                <td>{{ stock.price }}</td>
-                                <td>{{ stock.pre_close }}</td>
-                                <td>{{ stock.price_rate }}%</td>
-                                <td>{{ stock.volume }}</td>
-                                <td>{{ stock.cost }}</td>
-                                <td>{{ stock.hand }}</td>
-                                <td>{{ stock.amount }}</td>
-                                <td>{{ stock.profit }}</td>
-                                <td>{{ stock.rate }}%</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </section>
+    <body ng-app="app">{% raw %}
+      <div ng-controller="MainCtl" ng-cloak>
+        <div class="progress-bar striped animated" ng-if="progressing">
+          <span class="progress-bar-red" style="width: 100%;"></span>
+        </div>
+        <div class="modal-mask" ng-if="showModal">
+          <div class="modal">
+            <div class="modal-head">
+              <p class="modal-title no-break"><span ng-bind="stock.name"></span>[<small ng-bind="stock.code"></small>]</p>
             </div>
-        </main>
-    </body>
+            <div class="modal-body">
+              <div class="form-control-group">
+                <div class="form-control grow-2x">
+                  <label>Cost</label>
+                  <input type="text" placeholder="" ng-model="stock.price">
+                </div>
+            
+                <div class="form-control">
+                  <label>Hand</label>
+                  <input type="text" placeholder="" ng-model="stock.hand">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+                <button class="button-danger-outlined button-small" ng-click="closeModal()">Close</button>
+                <button class="button-success-outlined button-small float-right" ng-click="">Ok</button>
+            </div>
+            <div class="clear-fix"></div>
+          </div>
+        </div>
+        <main>
+          <div class="container">
+            <section id="result">
+              <h3 class="float-left">Keep Stocks <span style="font-size: 12px;"> @<span>{{ updateAt | date : 'HH:mm:ss'}}</span></span></h3>
+              <button class="float-right button-primary button-small" ng-click="fetch()">Refresh</button>
+              <div class="clear-fix"></div>
+              <table>
+                <thead>
+                  <tr>
+                    <th rowspan="2">Total</th>
+                    <th>Amount</th>
+                    <th colspan="2">{{ total.amount | currency:''}}</th>
+                    <th rowspan="2">Origin</th>
+                    <th>Amount</th>
+                    <th colspan="2">{{ origin.amount | currency:''}}</th>
+                  </tr>
+                  <tr>
+                    <th>Profit</th>
+                    <th colspan="2">{{ total.profit | currency:''}}</th>
+                    <th>Rate</th>
+                    <th colspan="2">{{ origin.rate }}%</th>
+                  </tr>
+                </thead>
+              </table>
+              <table>
+                <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Name</th>
+                      <th>Price</th>
+                      <th>Pre</th>
+                      <th>PriceRate</th>
+                      <th>Vol</th>
+                      <th>Cost</th>
+                      <th>Hands</th>
+                      <th>Amount</th>
+                      <th>Profit</th>
+                      <th>Rate</th>
+                      <th>-</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="stock in stocks">
+                    <td><a target="_blank" href="https://xueqiu.com/S/{{ stock.code }}">{{ stock.code }}</a></td>
+                    <td>{{ stock.name }}</td>
+                    <td>{{ stock.price | currency:''}}</td>
+                    <td>{{ stock.pre_close | currency:''}}</td>
+                    <td ng-class="{true : 'red',false : 'green' }[stock.price_rate > 0]">{{ stock.price_rate | currency:''}}%</td>
+                    <td>{{ stock.volume }}</td>
+                    <td>{{ stock.cost | currency:''}}</td>
+                    <td>{{ stock.hand }}</td>
+                    <td>{{ stock.amount | currency:''}}</td>
+                    <td ng-class="{true : 'red',false : 'green' }[stock.profit > 0]">{{ stock.profit | currency:''}}</td>
+                    <td ng-class="{true : 'red',false : 'green' }[stock.rate > 0]">{{ stock.rate }}%</td>
+                    <td>
+                        <button class="button-no-margin button-danger-outlined button-small" ng-click="buy(stock)">B</button> 
+                        <button class="button-no-margin button-primary-outlined button-small" ng-click="sell(stock)">S</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script src="https://cdn.bootcss.com/angular.js/1.7.0/angular.min.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.10/lodash.min.js"></script>
     <script>
-        document.querySelector('#btn-refresh').addEventListener('click', function(){
-            window.location.reload();
-        }, false);
-        setInterval(function(){
-            window.location.reload();
-        }, 30 * 1000);
+        // document.querySelector('#btn-refresh').addEventListener('click', function(){
+        //     window.location.reload();
+        // }, false);
+        // setInterval(function(){
+        //     window.location.reload();
+        // }, 30 * 1000);
+        angular.module('app',[])
+          .controller('MainCtl', function($scope, $http){
+            $scope.origin = {};
+            $scope.stocks = [];
+            $scope.stock = {};
+            $scope.total = {};
+            $scope.progressing = false;
+            $scope.updateAt = _.now();
+            $scope.showModal = false;
+
+            $scope.closeModal = function(){
+              $scope.showModal = false;
+            };
+            
+            // Buy stock
+            $scope.buy = function(stock){
+              $scope.showModal = true;
+              $scope.stock = stock;
+            };
+
+            $scope.fetch = function(){
+              $scope.updateAt = _.now();
+
+              $http.get(`./api/keep`)
+                .then(function(rsp){
+                  $scope.origin = rsp.data.origin;
+                  $scope.total = rsp.data.total;
+                  $scope.stocks = rsp.data.stocks;
+                  $scope.progressing = false;
+                })
+                .catch(function(err){
+                  console.error(err);
+                  $scope.progressing = false;
+                })
+            };
+            $scope.progressing = true;
+            $scope.fetch();
+              
+          });
     </script>
+    {% endraw %}
+    </body>
 </html>

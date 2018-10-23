@@ -7,5 +7,14 @@ stock = Blueprint('stock', __name__, template_folder='pages')
 
 @stock.route('/')
 def index():
+    return render_template('stock/index.html')
+
+@stock.route('/api/keep')
+def api_get_keep():
     stocks, total, origin = get_profit()
-    return render_template('stock/index.html', stocks = stocks, total = total, origin = origin)
+    return jsonify({'stocks': stocks, 'total': total, 'origin': origin})
+
+
+@stock.route('/trade')
+def trade():
+    return render_template('stock/trade.html')
