@@ -14,7 +14,11 @@ def api_get_keep():
     stocks, total, origin = get_profit()
     return jsonify({'stocks': stocks, 'total': total, 'origin': origin})
 
-
+@stock.route('/api/sub/<code>')
+def api_sub_stock(code):
+    data = sub_stock(code)
+    return jsonify(data)
+    
 @stock.route('/trade')
 def trade():
     return render_template('stock/trade.html')

@@ -53,18 +53,40 @@
         <div class="modal-mask" ng-if="showModal">
           <div class="modal">
             <div class="modal-head">
-              <p class="modal-title no-break"><span ng-bind="stock.name"></span>[<small ng-bind="stock.code"></small>]</p>
+              <p class="modal-title no-break"><span ng-bind="trade.name"></span>[<small ng-bind="trade.code"></small>]</p>
             </div>
             <div class="modal-body">
               <div class="form-control-group">
-                <div class="form-control grow-2x">
+                <div class="form-control">
                   <label>Cost</label>
-                  <input type="text" placeholder="" ng-model="stock.price">
+                  <input type="text" placeholder="" ng-model="trade.price | currency:''">
                 </div>
             
                 <div class="form-control">
                   <label>Hand</label>
-                  <input type="text" placeholder="" ng-model="stock.hand">
+                  <input type="text" placeholder="" ng-change="changeRate()" ng-model="trade.hand">
+                </div>
+              </div>
+              <div class="form-control-group">
+                <div class="form-control">
+                  <label>Target Price</label>
+                  <input type="text" placeholder="" disable ng-model="trade.target_price | currency:''">
+                </div>
+            
+                <div class="form-control">
+                  <label>Target Rate(%)</label>
+                  <input type="text" placeholder="" ng-change="changeRate()" ng-model="trade.target_rate">
+                </div>
+              </div>
+              <div class="form-control-group">
+                <div class="form-control">
+                  <label>Target Date</label>
+                  <input type="date" placeholder="" ng-model="trade.target_price | currency:''">
+                </div>
+            
+                <div class="form-control">
+                  <label>Target Profit</label>
+                  <input type="text" placeholder="" ng-model="trade.target_profit | currency:''">
                 </div>
               </div>
             </div>
@@ -153,7 +175,7 @@
           .controller('MainCtl', function($scope, $http){
             $scope.origin = {};
             $scope.stocks = [];
-            $scope.stock = {};
+            $scope.trade = {};
             $scope.total = {};
             $scope.progressing = false;
             $scope.updateAt = _.now();
@@ -163,10 +185,14 @@
               $scope.showModal = false;
             };
             
+            $scope.changeRate = function(){
+              $scope.trade.target_price = $scope.trade.price * (1 + parseFloat($scope.trade.target_rate)/100);
+              $scope.trade.target_profit = parseFloat($scope.trade.price) * 100 * parseInt($scope.trade.hand) * parseFloat($scope.trade.target_rate)/100;
+            }
             // Buy stock
             $scope.buy = function(stock){
               $scope.showModal = true;
-              $scope.stock = stock;
+              $scope.trade = _.assign(stock, { hand: 1, target_price: stock.price * 1.03 , target_rate: 3, target_date: _.now() + 7 * 24 * 3600 });
             };
 
             $scope.fetch = function(){

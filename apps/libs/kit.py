@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, time, re, requests, json
+import os, time, re, requests, json, hashlib
 
 def current_milli_time():
     return int(round(time.time()))
@@ -17,6 +17,17 @@ def write_json_to_file(file_path, data):
         return True, None
     except Exception as e:
         return False, e
+
+def get_json(url, data = {}):
+    r = requests.get(url)
+    return r.json()
+
+def post_json(url, args = {}, json_format = True):
+    r = requests.post(url, json = args)
+    if json_format:
+        return r.json()
+    else:
+        return r.text
 
 def get_json_from_file(file_path):
     data = None
@@ -54,3 +65,8 @@ def str_search(origin_str, regex):
     if m:
         return m.group(0)
     return False
+
+def md5(origin):
+    hl = hashlib.md5()
+    hl.update(origin.encode(encoding='utf-8'))
+    return hl.hexdigest()
