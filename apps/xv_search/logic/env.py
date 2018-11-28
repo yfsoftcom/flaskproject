@@ -6,7 +6,7 @@ if NET_MODE == 'GLOBAL':
     DOMAIN = 'https://www.xvideos.com'
     RSS_URL = DOMAIN + '/rss/rss.xml'
 else:
-    DOMAIN = 'http://xvideos.sexcache.net'
+    DOMAIN = 'https://xvideos.sexcache.net'
     RSS_URL = DOMAIN + '/rss'
 
 URL = DOMAIN + '/?k='
