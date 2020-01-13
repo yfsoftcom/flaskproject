@@ -168,6 +168,7 @@ class XvSearchLogic(object):
             # https://images-llnw.xvideos-cdn.com/videos/videopreview/8b/35/e3/8b35e3b9b528424a33a33d365bd9387b_169.mp4
             self._sqlhelper.execute("update x_videos set duration = ?, views = ?  where id = ?", 
                     (data['duration'], data['views'], int(data['id']) ) )
+            print(data)
             self._data.append(data)
 
         cache_document = {'keywords': keywords, 'pagination': { 'current': int(page), 'max': max_page , 'total': total}, 'rows': self._data }
@@ -184,7 +185,9 @@ class XvSearchLogic(object):
             is_include = True
             if row['valid_time'] > now:
                 return row
+        print(VIDEO_FRAME + str(vid))
         video_html = download(VIDEO_FRAME + str(vid))
+        print(video_html)
         root = etree.ElementTree(etree.HTML(video_html))
         # video_title = root.xpath('//title')[0].text
         video_script = root.xpath('//body/script')[4].text
