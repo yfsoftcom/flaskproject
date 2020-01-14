@@ -2,6 +2,8 @@ all: target build push clean
 
 target:
 	@echo target
+test:
+	 python -m unittest discover -s apps/$(proj)/test -v -p *$(file).py
 dev:
 	python3 apps/main.py
 install:

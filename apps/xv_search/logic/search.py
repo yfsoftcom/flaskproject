@@ -232,7 +232,7 @@ class XvSearchLogic(object):
         current_app.logger.info(video_html)
         root = etree.ElementTree(etree.HTML(video_html))
         # video_title = root.xpath('//title')[0].text
-        video_script = root.xpath('//body/script[contains(text(), "setVideoUrlLow")]')[0].text
+        video_script = root.xpath('//body//script[contains(text(), "setVideoUrlLow")]')[0].text
         video_title = str_search(video_script, regex_video_title)
         video_title = str_search(video_title, re.compile(r'\'[ \S^\)]+\'')).replace('\'', '')
         r = str_search(video_script, regex_video_mp4)
