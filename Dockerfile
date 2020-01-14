@@ -1,9 +1,8 @@
 FROM python:3.7.6-alpine3.10
-COPY ./requirements.txt /requirements.txt
 WORKDIR /apps
-RUN apk add --no-cache libxml2 && \
-    pip install -r /requirements.txt && \
-    apk del .build-deps
+RUN pip install lxml && \
+    pip install requests && \
+    pip install flask
 # -i https://pypi.tuna.tsinghua.edu.cn/simple
 EXPOSE 5555
 
