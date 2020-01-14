@@ -7,7 +7,7 @@ test:
 dev:
 	python3 apps/main.py
 run:
-	docker run -rm -e NET_MODE=GLOBAL --restart=always -p 5555:5555 -d --name xv_search yfsoftcom/xv_search
+	docker run -e NET_MODE=GLOBAL --restart=always -p 5555:5555 -d --name xv_search yfsoftcom/xv_search
 install:
 	pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 build:
