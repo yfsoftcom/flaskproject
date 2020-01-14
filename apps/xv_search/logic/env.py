@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
+import logging
+logging.basicConfig(level=logging.INFO, file='app.log')
+logger = logging.getLogger(__name__)
 
 NET_MODE = os.getenv('NET_MODE', 'CN')
 if NET_MODE == 'GLOBAL':
