@@ -194,7 +194,7 @@ class XvSearchLogic(object):
         for div in list_div:
             data = {}
             div_tree = etree.ElementTree(div)
-            data['href'] = VIDEO_PREFIX + div_tree.xpath('//div[@class="thumb"]/a/@href')[0]
+            data['href'] = VIDEO_PREFIX + div_tree.xpath('//div[@class="thumb-under"]/a/@href')[0]
             data['prev_image'] = div_tree.xpath('//div[@class="thumb"]/a/img/@data-src')[0]
             data['id'] = div_tree.xpath('//div[@class="thumb"]/a/img/@data-videoid')[0]
             data['title'] = div_tree.xpath('//p/a/@title')[0]
