@@ -3,7 +3,7 @@ import os
 
 NET_MODE = os.getenv('NET_MODE', 'CN')
 if NET_MODE == 'GLOBAL':
-    DOMAIN = 'https://xvideos.com'
+    DOMAIN = 'https://www.xvideos.com'
     RSS_URL = DOMAIN + '/rss/rss.xml'
 else:
     DOMAIN = 'https://xvideos.sexcache.net'

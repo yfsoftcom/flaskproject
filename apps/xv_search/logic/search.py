@@ -34,6 +34,45 @@ from .env import URL, VIDEO_PREFIX, VIDEO_FRAME
     </p>
 </div>
 """
+"""
+2020-01-14 update
+<div id="video_19129995" data-id="19129995" class="thumb-block ">
+   <div class="thumb-inside">
+      <div class="thumb">
+         <a href="/video19129995/due_west_our_sex_journey_2012_">
+            <img src="https://static-l3.xvideos-cdn.com/img/lightbox/lightbox-blank.gif" data-src="https://img-hw.xvideos-cdn.com/videos/thumbs169ll/7e/2b/9d/7e2b9d8c190fd8701c1e3271fca2851f/7e2b9d8c190fd8701c1e3271fca2851f.9.jpg" data-idcdn="2" data-videoid="19129995" id="pic_19129995" />
+         </a>
+      </div>
+      <span class="video-hd-mark">720p</span>
+   </div>
+   <div class="thumb-under">
+      <p class="title">
+         <a href="/video19129995/due_west_our_sex_journey_2012_" title="Due West Our Sex Journey (2012)">Due West Our Sex Journey (2012)</a>
+      </p>
+      <p class="metadata">
+         <span class="bg">
+            <span class="duration">18 min</span>
+            <a href="/profiles/maybelle_camryn">
+               <span class="name">Maybelle Camryn</span>
+            </a>
+            <span>
+               <span class="sprfluous">-</span>
+               2.1M
+               <span class="sprfluous">Views</span>
+            </span>
+            <span class="sprfluous">-</span>
+         </span>
+      </p>
+   </div>
+   <script>xv.thumbs.prepareVideo(19129995);</script>
+</div>
+"""
+
+"""
+html5player.setVideoUrlLow('https://video-hw.xvideos-cdn.com/videos/3gp/c/3/2/xvideos.com_c321e01b8252276499cd5be7f2a3bf4a.mp4?e=1578971139&ri=1024&rs=85&h=5ce157151ad8474f120a942bd9944a9c');
+html5player.setVideoUrlHigh('https://video-hw.xvideos-cdn.com/videos/mp4/c/3/2/xvideos.com_c321e01b8252276499cd5be7f2a3bf4a.mp4?e=1578971139&ri=1024&rs=85&h=2e6092ee702317d01929fca55780269e');
+html5player.setVideoHLS('https://hls-hw.xvideos-cdn.com/videos/hls/c3/21/e0/c321e01b8252276499cd5be7f2a3bf4a/hls.m3u8?e=1578971139&l=0&h=a5f1e53ff4de8f29dea2cdfb1d13fcb5');
+"""
 
 regex_http = re.compile(r'(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\/\\\+&amp;%\$#_=]*)?')
 regex_video_mp4 = re.compile(r'setVideoUrlLow\(\'[\S^\)]+\'\)')
@@ -57,6 +96,7 @@ CREATE_TABLE_SEARCH_CACHE_CMD = '''create table if not exists search_cache(
 CREATE_TABLE_VIDEOS_CMD = '''create table if not exists x_videos(
     id int primary key  not null,
     src text,
+    href text,
     title text,
     valid_time int not null,
     prev_image text,
@@ -175,22 +215,22 @@ class XvSearchLogic(object):
         self.set_cache(cache_key, cache_document)
         return cache_document
 
-    def get_video(self, vid):
+    def get_video(self, vid, href):
         vid = int(vid)
         now = current_milli_time()
         is_include = False
-        row, e = self._sqlhelper.find_one("select id, src, title, star, valid_time from x_videos where id=?", (vid,), 
-            fields = ['id', 'src', 'title', 'star', 'valid_time'])
+        row, e = self._sqlhelper.find_one("select id, src, title, star, href, valid_time from x_videos where id=?", (vid,), 
+            fields = ['id', 'src', 'title', 'star', 'href', 'valid_time'])
         if row is not None:
             is_include = True
             if row['valid_time'] > now:
                 return row
-        print(VIDEO_FRAME + str(vid))
-        video_html = download(VIDEO_FRAME + str(vid))
+        print(VIDEO_PREFIX + href)
+        video_html = download(VIDEO_PREFIX + href)
         print(video_html)
         root = etree.ElementTree(etree.HTML(video_html))
         # video_title = root.xpath('//title')[0].text
-        video_script = root.xpath('//body/script')[4].text
+        video_script = root.xpath('//body/script[contains(text(), "setVideoUrlLow")]')[0].text
         video_title = str_search(video_script, regex_video_title)
         video_title = str_search(video_title, re.compile(r'\'[ \S^\)]+\'')).replace('\'', '')
         r = str_search(video_script, regex_video_mp4)
@@ -200,9 +240,9 @@ class XvSearchLogic(object):
                 self._sqlhelper.execute("update x_videos set src = ?, valid_time = ? where id = ?", 
                     (src, now + ONE_HOUR, vid) )
             else:
-                self._sqlhelper.execute("insert into x_videos (id, src, title, star, valid_time) values (?, ?, ?, ?, ?)", 
-                    (vid, src, video_title, 0, now + ONE_HOUR) )
-            return { 'id': vid, 'src': src, 'title': video_title, 'star': 0 }
+                self._sqlhelper.execute("insert into x_videos (id, src, href, title, star, valid_time) values (?, ?, ?, ?, ?, ?)", 
+                    (vid, src, href, video_title, 0, now + ONE_HOUR) )
+            return { 'id': vid, 'src': src, 'href': href, 'title': video_title, 'star': 0 }
         return False
 
     def star(self, vid):
