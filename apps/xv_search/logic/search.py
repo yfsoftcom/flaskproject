@@ -227,8 +227,8 @@ class XvSearchLogic(object):
             is_include = True
             if row['valid_time'] > now:
                 return rows
-        current_app.logger.info(VIDEO_PREFIX + '/video' + vid + '/' + href)
-        video_html = download(VIDEO_PREFIX + '/video' + vid + '/' + href)
+        current_app.logger.info(VIDEO_PREFIX + '/video' + str(vid) + '/' + href)
+        video_html = download(VIDEO_PREFIX + '/video' + str(vid) + '/' + href)
         current_app.logger.info(video_html)
         root = etree.ElementTree(etree.HTML(video_html))
         # video_title = root.xpath('//title')[0].text
