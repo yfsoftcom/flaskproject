@@ -221,8 +221,8 @@ class XvSearchLogic(object):
         vid = int(vid)
         now = current_milli_time()
         is_include = False
-        row, e = self._sqlhelper.find_one("select id, src, title, star, href, valid_time from x_videos where id=?", (vid,), 
-            fields = ['id', 'src', 'title', 'star', 'href', 'valid_time'])
+        row, e = self._sqlhelper.find_one("select id, src, title, star, valid_time from x_videos where id=?", (vid,), 
+            fields = ['id', 'src', 'title', 'star', 'valid_time'])
         if row is not None:
             is_include = True
             if row['valid_time'] > now:
