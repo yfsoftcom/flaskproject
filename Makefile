@@ -9,7 +9,7 @@ dev:
 install:
 	pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 build:
-	@echo build
+	docker build --tag yfsoftcom/xv_search .
 push:
 	@echo push
 clean:
