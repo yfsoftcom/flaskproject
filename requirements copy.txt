@@ -1,0 +1,17 @@
+requests
+lxml
+flask
+PyMySQL
+grpcio
+grpcio-tools
+numpy
+
+bs4
+msgpack
+pandas
+requests
+zmq
+simplejson
+tushare
+
+redis
