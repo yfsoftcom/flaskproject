@@ -1,4 +1,4 @@
-FROM python:3.7.6-alpine3.10
+FROM python:3.7-alpine
 COPY ./requirements.txt /requirements.txt
 WORKDIR /apps
 RUN apk add --update --no-cache --virtual .build-deps \
@@ -6,9 +6,9 @@ RUN apk add --update --no-cache --virtual .build-deps \
         python-dev \
         libxml2 \
         libxml2-dev && \
-    apk add libxslt-dev && \
-    apk del .build-deps
-RUN pip install -r /requirements.txt
+        apk add libxslt-dev  && \
+        pip install --no-cache-dir -r /requirements.txt && \
+        apk del .build-deps
 # -i https://pypi.tuna.tsinghua.edu.cn/simple
 EXPOSE 5555
 
