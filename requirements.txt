@@ -1,3 +1,4 @@
 requests
+libxml2
 lxml
 flask
