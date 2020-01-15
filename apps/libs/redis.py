@@ -4,6 +4,7 @@ its for redis helper
 """
 
 import redis
+encoding = 'utf-8'
 
 class RedisHelper(object):
     def __init__(self):
@@ -23,6 +24,7 @@ class RedisHelper(object):
     def get_value_str(self, key):
         """string 根据key 获取值 返回True"""
         res = self._r.get(key)
+        res = str(res, encoding)
         return res
 
     def delete_by_key(self, key):
