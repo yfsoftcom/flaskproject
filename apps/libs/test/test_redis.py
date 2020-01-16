@@ -16,9 +16,9 @@ class TestRedisHelper(unittest.TestCase):
         helper.close()
 
     def test_set_and_get_data(self):
-        res = helper.set_value_str('test', 'foo')
+        res = helper.set('test', 'foo')
         self.assertTrue(res)
-        self.assertEqual('foo', helper.get_value_str('test'))
+        self.assertEqual('foo', helper.get('test'))
 
     
 

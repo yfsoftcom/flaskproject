@@ -13,30 +13,43 @@ class RedisHelper(object):
     def connect(self, host = 'localhost', port = 6379):
         self._r = redis.Redis(host = host, port = port)
     
+    def get_instance(self):
+        return self._r
+
     def close(self):
         pass
 
-    def set_value_str(self, key, value):
+    def setex(self, key, value, ex):
+        """string 设置key value"""
+        res = self._r.setex(key, ex, value)
+        return res
+
+    def set(self, key, value):
         """string 设置key value"""
         res = self._r.set(key, value)
         return res
 
-    def get_value_str(self, key):
+    def get(self, key, wrapper = None):
         """string 根据key 获取值 返回True"""
         res = self._r.get(key)
-        res = str(res, encoding)
+        if res == None:
+            return None
+        if wrapper != None:
+            res = wrapper(res)
+        else:
+            res = str(res, encoding)
         return res
 
-    def delete_by_key(self, key):
+    def delete(self, key):
         """string 根据key 删除这个键值"""
         res = self._r.delete(key)
         return res
 
-    def exists_by_key(self, key):
+    def exists(self, key):
         """判断指定的key是否存在 存在返回True 否则 False"""
         res = self._r.exists(key)
         return res
-
+    
     def zadd_key_new(self, name, data):
         """
         添加有序集合数据

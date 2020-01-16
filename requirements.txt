@@ -1,3 +1,6 @@
 requests
 lxml
 flask
+redis
+PySocks
+requests[socks]

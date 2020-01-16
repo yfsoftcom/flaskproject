@@ -5,6 +5,7 @@ from flask import current_app
 from libs.kit import *
 from lxml import etree
 from libs.sqlite import Sqlite3Helper
+from libs.redis import RedisHelper
 from .env import URL, VIDEO_PREFIX, VIDEO_FRAME
 
 """
@@ -109,63 +110,36 @@ CREATE_TABLE_VIDEOS_CMD = '''create table if not exists x_videos(
 
 class XvSearchLogic(object):
     def __init__(self):
-        self._sqlhelper = Sqlite3Helper()
-        self._sqlhelper.connect_db('xv1.db')
+        self._r = RedisHelper()
         self.init_db()
 
     def __del__(self):
-        self._sqlhelper.close()
+        self._r.close()
 
     def init_db(self):
-        self._sqlhelper.begin_trans()
-        # create table
-        self._sqlhelper.execute(CREATE_TABLE_SEARCH_KEYWORDS_RECORD_CMD)
-        self._sqlhelper.execute(CREATE_TABLE_SEARCH_CACHE_CMD)
-        self._sqlhelper.execute(CREATE_TABLE_VIDEOS_CMD)
-        self._sqlhelper.commit()
-
-        num, e = self._sqlhelper.find_one('select count(*) from search_keywords_record')
-        if num[0] == 0:
-            self._sqlhelper.begin_trans()
-            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('jav bj', 1))
-            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('91kk哥', 1))
-            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", ('pron', 1))
-            self._sqlhelper.commit()
+        self._r.connect()
 
     def get_cache(self, key):
-        cache, e = self._sqlhelper.find_one("select cache_document from search_cache where cache_key=?", (key,))
-        if cache is None:
-            return False
-        return json.loads(cache[0])
+        cache = self._r.get('search:' + key)
+        if cache != None:
+            return json.loads(cache)
 
     def clean_cache(self):
-        now = current_milli_time()
-        
-        self._sqlhelper.execute("delete from search_cache where valid_time < ?", (now,))
+        pass
 
     def set_cache(self, key, document):
-        self._sqlhelper.execute("insert into search_cache values (?, ?, ?)", (key, json.dumps(document), current_milli_time() + CACHE_DURATION))
-        self.clean_cache()
+        self._r.setex('search:' + key, document, CACHE_DURATION)
 
     def push_keyword(self, keyword):
-
         lower = keyword.lower()
-        row, e = self._sqlhelper.find_one('select count(*) as num from search_keywords_record where search_content=?', (lower,) )
-        
-        # 获得查询结果集:
-        num = row[0]
-        if num > 0:
-            self._sqlhelper.execute("update search_keywords_record set counter = counter + 1 where search_content=?", (lower, ) )
-        else:
-            self._sqlhelper.execute("insert into search_keywords_record values (?, ?)", (lower, 1))
+        self._r.get_instance().zincrby('search_keywords_record', -1, lower)
 
     def get_top3_keywords(self):
-        rows, e = self._sqlhelper.find_all('select search_content from search_keywords_record order by counter desc limit 3 offset 0')
-        return [ x[0] for x in rows ]
+        rows = self._r.get_instance().zrange('search_keywords_record', start=0, end=3, withscores=False)
+        return [ str(x, 'utf8') for x in rows ]
 
     def get_hot_rank(self):
-        rows, e = self._sqlhelper.find_all('select id, src, title, star from x_videos order by star desc limit 10 offset 0', 
-            fields = ['id', 'src', 'title', 'star'])
+        rows = self._r.get_instance().zrange('video_star', start=0, end=10, withscores=False)
         return rows
 
     def do_search(self, keywords = 'japan+blowjob', page = 0):
@@ -208,28 +182,26 @@ class XvSearchLogic(object):
             # data['prev_video'] = div_tree.xpath('//div[@class="thumb"]/a/img/@data-src')[0]
             # https://images-llnw.xvideos-cdn.com/videos/thumbs169/8b/35/e3/8b35e3b9b528424a33a33d365bd9387b/8b35e3b9b528424a33a33d365bd9387b.26.jpg
             # https://images-llnw.xvideos-cdn.com/videos/videopreview/8b/35/e3/8b35e3b9b528424a33a33d365bd9387b_169.mp4
-            self._sqlhelper.execute("update x_videos set duration = ?, views = ?  where id = ?", 
-                    (data['duration'], data['views'], int(data['id']) ) )
-            current_app.logger.info(data['href'], data['id'])
+            
+            current_app.logger.info(data['id'])
+            current_app.logger.info(data['href'])
             self._data.append(data)
 
         cache_document = {'keywords': keywords, 'pagination': { 'current': int(page), 'max': max_page , 'total': total}, 'rows': self._data }
-        self.set_cache(cache_key, cache_document)
+        self.set_cache(cache_key, json.dumps(cache_document))
         return cache_document
 
     def get_video(self, vid, href):
         vid = int(vid)
         now = current_milli_time()
         is_include = False
-        row, e = self._sqlhelper.find_one("select id, src, title, star, valid_time from x_videos where id=?", (vid,), 
-            fields = ['id', 'src', 'title', 'star', 'valid_time'])
+        row = self._r.get_instance().hget("videos", str(vid))
         if row is not None:
             is_include = True
             if row['valid_time'] > now:
-                return rows
+                return row
         current_app.logger.info(VIDEO_PREFIX + '/video' + str(vid) + '/' + href)
         video_html = download(VIDEO_PREFIX + '/video' + str(vid) + '/' + href)
-        current_app.logger.info(video_html)
         root = etree.ElementTree(etree.HTML(video_html))
         # video_title = root.xpath('//title')[0].text
         video_script = root.xpath('//body//script[contains(text(), "setVideoUrlLow")]')[0].text
@@ -238,16 +210,13 @@ class XvSearchLogic(object):
         r = str_search(video_script, regex_video_mp4)
         if r:
             src = str_search(r, regex_http).strip()
-            if is_include:
-                self._sqlhelper.execute("update x_videos set src = ?, valid_time = ? where id = ?", 
-                    (src, now + ONE_HOUR, vid) )
-            else:
-                self._sqlhelper.execute("insert into x_videos (id, src, href, title, star, valid_time) values (?, ?, ?, ?, ?, ?)", 
-                    (vid, src, href, video_title, 0, now + ONE_HOUR) )
-            return { 'id': vid, 'src': src, 'href': href, 'title': video_title, 'star': 0 }
+            one = { 'id': vid, 'src': src, 'href': href, 'title': video_title, 'star': 0, 'valid_time': now + ONE_HOUR }
+            self._r.get_instance().hset("videos", str(vid), json.dumps(one))
+            return one
         return False
 
     def star(self, vid):
-        self._sqlhelper.execute("update x_videos set star = star + 1 where id=?", (int(vid), ) )
+        row = self._r.get_instance().hget("videos", str(vid))
+        self._r.get_instance().zincrby('video_star', -1, row['title'])
         return {'errno': 0}
 

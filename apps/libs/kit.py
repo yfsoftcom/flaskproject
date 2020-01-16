@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 import os, time, re, requests, json, hashlib
+proxy = '127.0.0.1:7070'
+proxies = {
+    'http': 'socks5h://' + proxy,
+    'https': 'socks5h://' + proxy
+}
 
 def current_milli_time():
     return int(round(time.time()))
@@ -19,11 +24,15 @@ def write_json_to_file(file_path, data):
         return False, e
 
 def get_json(url, data = {}):
-    r = requests.get(url)
+    r = requests.get(url, proxies=proxies)
     return r.json()
 
+def get_text(url, data = {}):
+    r = requests.get(url, proxies=proxies)
+    return r.text
+
 def post_json(url, args = {}, json_format = True):
-    r = requests.post(url, json = args)
+    r = requests.post(url, json = args, proxies=proxies)
     if json_format:
         return r.json()
     else:
@@ -48,14 +57,14 @@ def remove_file(file_path):
 def download(url, encoding = 'utf-8'):
     UA = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.13 Safari/537.36"
     header = { "User-Agent" : UA }
-    r = requests.get(url, headers = header)
+    r = requests.get(url, headers = header, proxies=proxies)
     r.encoding = encoding
     return r.text
 
 def download_file(url, file_path):
     UA = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.13 Safari/537.36"
     header = { "User-Agent" : UA }
-    r = requests.get(url, headers = header)
+    r = requests.get(url, headers = header, proxies=proxies)
     with open(file_path, 'wb') as fd:
         for chunk in r.iter_content(1024):
             fd.write(chunk)
