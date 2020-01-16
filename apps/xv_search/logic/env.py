@@ -13,6 +13,8 @@ else:
 URL = DOMAIN + '/?k='
 VIDEO_PREFIX = DOMAIN
 
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+
 VIDEO_FRAME = DOMAIN + '/embedframe/'
 
 VERSION = '1.0.0'

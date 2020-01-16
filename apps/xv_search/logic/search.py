@@ -5,7 +5,7 @@ from flask import current_app
 from libs.kit import *
 from lxml import etree
 from libs.redis import RedisHelper
-from .env import URL, VIDEO_PREFIX, VIDEO_FRAME
+from .env import URL, VIDEO_PREFIX, VIDEO_FRAME, REDIS_HOST
 
 """
 <div id="video_34542905" class="thumb-block ">
@@ -116,7 +116,7 @@ class XvSearchLogic(object):
         self._r.close()
 
     def init_db(self):
-        self._r.connect()
+        self._r.connect(REDIS_HOST)
 
     def get_cache(self, key):
         cache = self._r.get('search:' + key)

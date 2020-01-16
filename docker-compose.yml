@@ -4,7 +4,7 @@ services:
     container_name: redis-server
     image: redis:alpine3.11
     ports: 
-      - "6379:6379"
+      - "16379:6379"
     networks:
       - dev-network
   web:
@@ -14,7 +14,8 @@ services:
       - "5555:5555"
     networks:
       - dev-network
-    # environment:
-    #   - PROXY=socks5h://127.0.0.1:7070
+    environment:
+      - PROXY=socks5h://127.0.0.1:7070
+      - REDIS_HOST=redis
 networks:
   dev-network: 
