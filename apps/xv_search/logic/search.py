@@ -4,7 +4,6 @@ from operator import itemgetter, attrgetter
 from flask import current_app
 from libs.kit import *
 from lxml import etree
-from libs.sqlite import Sqlite3Helper
 from libs.redis import RedisHelper
 from .env import URL, VIDEO_PREFIX, VIDEO_FRAME
 

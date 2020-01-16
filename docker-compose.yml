@@ -1,14 +1,19 @@
 version: '3'
 services:
+  redis:
+    name: redis-server
+    image: redis:alpine3.11
+    ports: 
+      - "6379:6379"
+    networks:
+      - dev-network
   web:
-    build: .
+    image: yfsoftcom/xv_search
     ports:
       - "5555:5555"
     networks:
       - dev-network
-    volumes:
-      - ./apps:/apps
-    environment:
-      - NET_MODE=CN
+    # environment:
+    #   - PROXY=socks5h://127.0.0.1:7070
 networks:
   dev-network: 

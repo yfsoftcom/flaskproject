@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import os, time, re, requests, json, hashlib
-proxy = '127.0.0.1:7070'
-proxies = {
-    'http': 'socks5h://' + proxy,
-    'https': 'socks5h://' + proxy
-}
+proxy = os.getenv('PROXY')
+# proxy = 'socks5h://127.0.0.1:7070'
+proxies = None
+if proxy is not None:
+    proxies = {
+        'http': proxy,
+        'https': proxy
+    }
 
 def current_milli_time():
     return int(round(time.time()))
@@ -24,11 +27,11 @@ def write_json_to_file(file_path, data):
         return False, e
 
 def get_json(url, data = {}):
-    r = requests.get(url, proxies=proxies)
+    r = requests.get(url, proxies = proxies)
     return r.json()
 
 def get_text(url, data = {}):
-    r = requests.get(url, proxies=proxies)
+    r = requests.get(url, proxies = proxies)
     return r.text
 
 def post_json(url, args = {}, json_format = True):
