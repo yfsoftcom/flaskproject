@@ -2,7 +2,7 @@
 import os
 import logging
 
-NET_MODE = os.getenv('NET_MODE', 'CN')
+NET_MODE = os.getenv('NET_MODE', 'GLOBAL')
 if NET_MODE == 'GLOBAL':
     DOMAIN = 'https://www.xvideos.com'
     RSS_URL = DOMAIN + '/rss/rss.xml'
