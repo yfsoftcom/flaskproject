@@ -4,37 +4,8 @@ from operator import itemgetter, attrgetter
 from flask import current_app
 from libs.kit import *
 from lxml import etree
-from libs.redis import RedisHelper
-from .env import URL, VIDEO_PREFIX, VIDEO_FRAME, REDIS_HOST
+from .env import URL, VIDEO_PREFIX, VIDEO_FRAME, redisHelper
 
-"""
-<div id="video_34542905" class="thumb-block ">
-    <div class="thumb-inside">
-        <div class="thumb">
-            <a href="/video34542905/mothers_fucked_in_front_of_their_daughters">
-            <img src="https://static-hw.xvideos.works/img/lightbox/lightbox-blank.gif" 
-                data-src="https://img-hw.xvideos-cdn.com/videos/thumbs169/1e/97/ac/1e97ac3658a6b68618e57843209e7c91/1e97ac3658a6b68618e57843209e7c91.21.jpg"
-                data-idcdn="2" 
-                data-videoid="34542905" 
-                id="pic_34542905" />
-            </a>
-        </div>
-    </div>
-    <p>
-        <a href="/video34542905/mothers_fucked_in_front_of_their_daughters" 
-            title="Mothers fucked in front of their daughters">Mothers fucked in front of their daughters
-        </a>
-    </p>
-    <p class="metadata">
-        <span class="bg">
-            <span class="duration">2h 0 min</span>
-            <a href="/profiles/vedius">Vedius</a>
-            <span> - 7.8M Views</span>
-            -
-        </span>
-    </p>
-</div>
-"""
 """
 2020-01-14 update
 <div id="video_19129995" data-id="19129995" class="thumb-block ">
@@ -77,6 +48,7 @@ html5player.setVideoHLS('https://hls-hw.xvideos-cdn.com/videos/hls/c3/21/e0/c321
 
 regex_http = re.compile(r'(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\/\\\+&amp;%\$#_=]*)?')
 regex_video_mp4 = re.compile(r'setVideoUrlLow\(\'[\S^\)]+\'\)')
+regex_video_hd = re.compile(r'setVideoUrlHigh\(\'[\S^\)]+\'\)')
 regex_video_title = re.compile(r'setVideoTitle\(\'[ \S^\)]+\'\)')
 LIMIT = 24
 
@@ -84,39 +56,12 @@ CACHE_DURATION = 6 * 60 * 60  # 6 hours
 
 ONE_HOUR = 60 * 60  # 1h
 
-CREATE_TABLE_SEARCH_KEYWORDS_RECORD_CMD = '''create table if not exists search_keywords_record(
-    search_content text primary key  not null,
-    counter        int  not null);'''
-
-CREATE_TABLE_SEARCH_CACHE_CMD = '''create table if not exists search_cache(
-    cache_key text primary key  not null,
-    cache_document text not null,
-    valid_time int not null);'''
-
-
-CREATE_TABLE_VIDEOS_CMD = '''create table if not exists x_videos(
-    id int primary key  not null,
-    src text,
-    href text,
-    title text,
-    valid_time int not null,
-    prev_image text,
-    duration text,
-    views text,
-    star int);'''
-
-
-
 class XvSearchLogic(object):
     def __init__(self):
-        self._r = RedisHelper()
-        self.init_db()
+        self._r = redisHelper
 
     def __del__(self):
         self._r.close()
-
-    def init_db(self):
-        self._r.connect(REDIS_HOST)
 
     def get_cache(self, key):
         cache = self._r.get('search:' + key)
@@ -197,7 +142,8 @@ class XvSearchLogic(object):
         row = self._r.get_instance().hget("videos", str(vid))
         if row is not None:
             is_include = True
-            if row['valid_time'] > now:
+            row = json.loads(row)
+            if int(row['valid_time']) > now:
                 return row
         current_app.logger.info(VIDEO_PREFIX + '/video' + str(vid) + '/' + href)
         video_html = download(VIDEO_PREFIX + '/video' + str(vid) + '/' + href)
@@ -207,15 +153,19 @@ class XvSearchLogic(object):
         video_title = str_search(video_script, regex_video_title)
         video_title = str_search(video_title, re.compile(r'\'[ \S^\)]+\'')).replace('\'', '')
         r = str_search(video_script, regex_video_mp4)
-        if r:
+        hd_r = str_search(video_script, regex_video_hd)
+        if r and hd_r:
             src = str_search(r, regex_http).strip()
-            one = { 'id': vid, 'src': src, 'href': href, 'title': video_title, 'star': 0, 'valid_time': now + ONE_HOUR }
+            hd = str_search(hd_r, regex_http).strip()
+            one = { 'id': vid, 'hd': hd, 'src': src, 'href': href, 'title': video_title, 'star': 0, 'valid_time': now + ONE_HOUR }
             self._r.get_instance().hset("videos", str(vid), json.dumps(one))
             return one
         return False
 
     def star(self, vid):
-        row = self._r.get_instance().hget("videos", str(vid))
+        row = json.loads(self._r.get_instance().hget("videos", str(vid)))
+        row['star'] = row['star'] + 1
+        self._r.get_instance().hset("videos", str(vid), json.dumps(row))
         self._r.get_instance().zincrby('video_star', -1, row['title'])
         return {'errno': 0}
 

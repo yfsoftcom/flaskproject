@@ -1,5 +1,11 @@
 all: test
 
+docker-redis:
+	docker run -p 6379:6379 -d --name redis-server redis:alpine3.11 
+
+redis-client:
+	docker exec -it redis-server redis-cli
+
 test:
 	python -m unittest discover -s $(proj)/test -v -p *$(file).py
 

@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 import logging
+from libs.redis import RedisHelper
 
-NET_MODE = os.getenv('NET_MODE', 'GLOBAL')
-if NET_MODE == 'GLOBAL':
-    DOMAIN = 'https://www.xvideos.com'
-    RSS_URL = DOMAIN + '/rss/rss.xml'
-else:
-    DOMAIN = 'https://xvideos.sexcache.net'
-    RSS_URL = DOMAIN + '/rss'
+USE_PROXY = os.getenv('USE_PROXY', '1')
+
+DOMAIN = 'https://www.xvideos.com'
+RSS_URL = DOMAIN + '/rss/rss.xml'
 
 URL = DOMAIN + '/?k='
 VIDEO_PREFIX = DOMAIN
@@ -19,4 +17,8 @@ VIDEO_FRAME = DOMAIN + '/embedframe/'
 
 VERSION = '1.0.0'
 
-logging.debug('NET_MODE is %s, URL: %s, VIDEO_PREFIX: %s' % (NET_MODE, URL, VIDEO_PREFIX))
+logging.debug('USE_PROXY is %s, URL: %s, VIDEO_PREFIX: %s' % (USE_PROXY, URL, VIDEO_PREFIX))
+
+redisHelper = RedisHelper()
+redisHelper.connect(REDIS_HOST)
+

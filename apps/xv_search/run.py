@@ -4,10 +4,12 @@ from libs.kit import *
 from .logic.search import XvSearchLogic
 from .logic.rss import XvRssLogic
 
+from .logic.user import UserLogic
+
 xv = Blueprint('xv', __name__, template_folder='pages')
 
 logic = XvSearchLogic()
-
+user = UserLogic()
 rss = XvRssLogic()
 
 @xv.route('/')
@@ -36,6 +38,18 @@ def api_get_video(vid, href):
 @xv.route('/api/star/<vid>')
 def api_star_video(vid):
     data = logic.star(vid)
+    return jsonify(data)
+
+@xv.route('/api/user/register', methods=['POST'])
+def api_user_register():
+    data = json.loads(request.get_data(as_text=True))
+    data = user.register(data)
+    return jsonify(data)
+
+@xv.route('/api/user/login', methods=['POST'])
+def api_user_login():
+    data = json.loads(request.get_data(as_text=True))
+    data = user.login(data['username'], data['password'])
     return jsonify(data)
 
 @xv.route('/changelog')

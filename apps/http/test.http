@@ -1,0 +1,36 @@
+### search
+GET http://localhost:5555/xv/api/search/p/0/jv
+
+### top3
+GET http://localhost:5555/xv/api/top3
+
+### star
+GET http://localhost:5555/xv/api/star/8768021
+
+### view
+GET http://localhost:5555/xv/api/video/8768021/asian_teen_shows_her_nice_body_for_a_photographer
+
+### view 2
+GET http://localhost:5555/xv/api/video/49924901/ryu_enami_goes_nuts_with_two_tasty_dicks_-_more_at_slurpjp.com
+
+
+### user register
+POST http://localhost:5555/xv/api/user/register
+Content-Type: application/json
+
+{
+  "username": "wang3",
+  "password": "foo",
+  "email": "wang3@foo.com",
+  "nickname": "MR.wang3"
+}
+
+### user login
+
+POST http://localhost:5555/xv/api/user/login
+Content-Type: application/json
+
+{
+  "username": "wang3",
+  "password": "foo"
+}

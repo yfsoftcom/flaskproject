@@ -2,7 +2,7 @@
 import os, time, re, json
 from libs.kit import *
 from lxml import etree
-from .env import URL, VIDEO_PREFIX, RSS_URL, NET_MODE, DOMAIN
+from .env import URL, VIDEO_PREFIX, RSS_URL, DOMAIN
 
 from urllib.request import urlopen
 from xml.etree.ElementTree import parse
