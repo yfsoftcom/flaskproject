@@ -34,3 +34,30 @@ Content-Type: application/json
   "username": "wang3",
   "password": "foo"
 }
+
+### favorite
+
+GET http://localhost:5555/xv/api/favorite/list/wang3
+
+###
+// add
+POST http://localhost:5555/xv/api/favorite/add
+Content-Type: application/json
+
+{
+  "username": "wang3",
+  "vid": "16281805",
+  "href": "haruna_brunette_angel_throats_cock_in_pov_style",
+  "title": "Haruna brunette angel throats cock in POV style",
+  "cover": "https://cdn77-pic.xvideos-cdn.com/videos/thumbs169ll/68/58/14/68581413d1e58d4fccd1eab568f7d721/68581413d1e58d4fccd1eab568f7d721.15.jpg"
+}
+
+###
+// del
+POST http://localhost:5555/xv/api/favorite/del
+Content-Type: application/json
+
+{
+  "username": "wang3",
+  "vid": "16281805"
+}

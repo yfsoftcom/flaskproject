@@ -18,7 +18,8 @@
         }
         .img-box{
             position: relative;
-            padding-bottom: 70%;
+            padding-bottom: 60%;
+            cursor: pointer;
         }
         .img-box img{
             position:absolute;
@@ -27,7 +28,7 @@
             left:0;
             right:0;
             width:100%;
-            margin:auto;
+            margin:2px auto;
         }
         img:after {  
             content: "\f1c5" " " attr(alt);
@@ -52,20 +53,48 @@
           .block{
               display: block;
           }
-          
           .card{
               overflow: hidden; padding: 10px; margin: 5px;
           }
-          h6,.no-break{
-              font-size: 16px;
+          .v-box:hover .v-title{
+              font-weight: bold;
+          }
+          .v-title{
+            font-size: 14px;
+            height: 1.4em;
+            overflow: hidden;
+            text-overflow:ellipsis;
+            white-space: nowrap;
+          }
+          .v-extra,.v-title{
+              margin-bottom: 5px;
+          }
+          .v-extra span{
+              font-size: 12px;
+          }
+          .no-break{
+              font-size: 14px;
               height: 2em;
               overflow: hidden;
               text-overflow:ellipsis;
               white-space: nowrap;
           }
-          .modal{
-              max-width: 100%;
-          }
+          /* Extra small devices (phones, 600px and down) */
+            @media only screen and (max-width: 600px) {
+                .modal{
+                    max-width: 100%;
+                    width: 100%;
+                    top: 25%;
+                }
+            }
+
+            /* Medium devices (landscape tablets, 768px and up) */
+            @media only screen and (min-width: 768px) {
+                .modal{
+                    max-width: 100%;
+                    width: 50%;
+                }
+            }
           .modal-head .modal-title{
               font-size: 14px;
               margin-bottom: 0; height: 1em; line-height: 1em;
@@ -150,13 +179,17 @@
             <main>
                 <section id="result">
                     <div class="row">
-                        <div class="col col-md-4" ng-repeat="row in result.rows">
-                            <div class="card">
-                                <h6 ng-bind="row.title"></h6>
+                        <div class="col col-md-3 col-sm-4" ng-repeat="row in result.rows">
+                            <div class="v-box" ng-click="show(row)">
                                 <div class="img-box">
                                     <img alt="{{row.title}}" class="img" src="" ng-src="{{row.prev_image}}" />
                                 </div>
-                                <p><span ng-bind="row.duration"></span> <span ng-bind="row.views"></span> <button class="button-xs button-warning-outlined float-right" ng-click="show(row)">Watch</button></p>
+                                <p class="v-title" ng-bind="row.title"></p>
+                                <p class="v-extra">
+                                    <span ng-bind="row.duration"></span>
+                                    <span ng-bind="row.views" class="float-right"></span>
+                                </p>
+                                <div class="clear-fix"></div>
                             </div>
                         </div>
                     </div>

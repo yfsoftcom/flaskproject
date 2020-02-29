@@ -18,7 +18,7 @@ class UserLogic(object):
         now = current_milli_time()
         userinfo['loginAt'] = now
         self._r.get_instance().hset("userinfo", username, json.dumps(userinfo))
-        return {'errno': 0, 'userinfo': userinfo }
+        return {'errno': 0, 'data': userinfo }
 
     def register(self, userinfo):
         username = userinfo['username']
@@ -32,8 +32,16 @@ class UserLogic(object):
         self._r.get_instance().hset("userinfo", username, json.dumps(userinfo))
         return {'errno': 0}
 
-    def favorite(self, username, vid):
+    def favorite(self, username, vid, info):
+        info['createAt'] = current_milli_time()
+        self._r.get_instance().hset("favorite:" + username , vid, json.dumps(info))
+        return {'errno': 0}
+
+    def del_favorite(self, username, vid):
+        self._r.get_instance().hdel("favorite:" + username , vid)
         return {'errno': 0}
 
     def list_favorite(self, username):
-        return {'errno': 0}
+        favoriteList = self._r.get_instance().hvals("favorite:" + username)
+        favoriteList = list(map(lambda x: json.loads(x), favoriteList))
+        return {'errno': 0, 'data': { 'total': len(favoriteList), 'rows': favoriteList } }

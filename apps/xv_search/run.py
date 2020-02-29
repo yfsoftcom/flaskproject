@@ -52,6 +52,25 @@ def api_user_login():
     data = user.login(data['username'], data['password'])
     return jsonify(data)
 
+@xv.route('/api/favorite/add', methods=['POST'])
+def api_favorite_add():
+    data = json.loads(request.get_data(as_text=True))
+    username = data['username']
+    del data['username']
+    data = user.favorite(username, data['vid'], data)
+    return jsonify(data)
+
+@xv.route('/api/favorite/del', methods=['POST'])
+def api_favorite_del():
+    data = json.loads(request.get_data(as_text=True))
+    data = user.del_favorite(data['username'], data['vid'])
+    return jsonify(data)
+
+@xv.route('/api/favorite/list/<username>')
+def api_favorite_list(username):
+    data = user.list_favorite(username)
+    return jsonify(data)
+
 @xv.route('/changelog')
 def changelog():
     return render_template('xv/changelog.html')

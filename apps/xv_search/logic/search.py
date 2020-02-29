@@ -147,9 +147,12 @@ class XvSearchLogic(object):
                 return row
         current_app.logger.info(VIDEO_PREFIX + '/video' + str(vid) + '/' + href)
         video_html = download(VIDEO_PREFIX + '/video' + str(vid) + '/' + href)
+        # print(video_html)
+        current_app.logger.info(video_html)
         root = etree.ElementTree(etree.HTML(video_html))
         # video_title = root.xpath('//title')[0].text
         video_script = root.xpath('//body//script[contains(text(), "setVideoUrlLow")]')[0].text
+        video_cover = root.xpath('//meta[@property="og:image"]/@content')[0]
         video_title = str_search(video_script, regex_video_title)
         video_title = str_search(video_title, re.compile(r'\'[ \S^\)]+\'')).replace('\'', '')
         r = str_search(video_script, regex_video_mp4)
@@ -157,7 +160,7 @@ class XvSearchLogic(object):
         if r and hd_r:
             src = str_search(r, regex_http).strip()
             hd = str_search(hd_r, regex_http).strip()
-            one = { 'id': vid, 'hd': hd, 'src': src, 'href': href, 'title': video_title, 'star': 0, 'valid_time': now + ONE_HOUR }
+            one = { 'id': vid, 'hd': hd, 'cover': video_cover,'src': src, 'href': href, 'title': video_title, 'star': 0, 'valid_time': now + ONE_HOUR }
             self._r.get_instance().hset("videos", str(vid), json.dumps(one))
             return one
         return False
